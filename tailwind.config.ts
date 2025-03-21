@@ -3,9 +3,9 @@ import { PluginAPI } from "tailwindcss/types/config";
 
 export default {
   content: [
-    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
+    "./components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
     extend: {
@@ -45,6 +45,16 @@ export default {
           btn_bg: "#333333", // 눌림 상태에서 더 어두운 회색
           btn_pressed: "#333333", // 눌림 상태에서 더 어두운 회색
           hover: "#444444", // 호버 상태에서 배경이 밝아지는 효과
+        },
+        ivory: {
+          bg: "#fdfdf4",
+          bg_sub: "#fffffa",
+          bg_primary: "#fdfaf2",
+          bg_secondary: "#fdfcf7",
+          text: "#fffcf2",
+          text_sub: "#fdf7e4",
+          hover: "#fdfaf2",
+          pressed: "#fff8e7",
         },
       },
       boxShadow: {
