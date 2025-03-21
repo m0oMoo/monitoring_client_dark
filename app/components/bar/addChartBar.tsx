@@ -12,7 +12,7 @@ interface AddChartBarProps {
   modifiable?: boolean;
 }
 
-const DarkAddChartBar = ({
+const AddChartBar = ({
   isEdit,
   onCreateClick,
   onEditClick,
@@ -78,4 +78,4 @@ const DarkAddChartBar = ({
   );
 };
 
-export default DarkAddChartBar;
+export default AddChartBar;
