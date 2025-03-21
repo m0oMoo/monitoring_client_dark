@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import "../../public/style/custom.css";
+import "../public/style/custom.css";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 import "react-tabulator/lib/styles.css";
