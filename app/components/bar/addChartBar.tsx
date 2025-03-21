@@ -32,7 +32,7 @@ const DarkAddChartBar = ({
   );
 
   const handleGoBack = () => {
-    router.push("/dashboard6");
+    router.push("/dashboard");
   };
 
   return (
