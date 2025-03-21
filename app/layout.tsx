@@ -11,6 +11,7 @@ import "react-datepicker/dist/react-datepicker.css";
 // import "react-tabulator/lib/css/tabulator.min.css";
 // import "react-tabulator/lib/css/tabulator_simple.min.css";
 import "react-tabulator/lib/css/tabulator_midnight.min.css";
+import Layout from "./components/layout/layout";
 // import "react-tabulator/lib/css/tabulator_modern.min.css";
 
 const geistSans = Geist({
@@ -34,11 +35,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="ko">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <Layout>{children}</Layout>
       </body>
     </html>
   );
