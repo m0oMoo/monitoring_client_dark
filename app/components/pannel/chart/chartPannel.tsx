@@ -31,7 +31,7 @@ type ChartWidgetProps = {
   options?: any;
 };
 
-const Chart = ({ type, datasets, options }: ChartWidgetProps) => {
+const ChartPannel = ({ type, datasets, options }: ChartWidgetProps) => {
   // 도넛/파이 차트용 데이터 변환
   const isPieOrDoughnut = type === "pie" || type === "doughnut";
 
@@ -142,4 +142,4 @@ const Chart = ({ type, datasets, options }: ChartWidgetProps) => {
   }
 };
 
-export default Chart;
+export default ChartPannel;
