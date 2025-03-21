@@ -1,0 +1,250 @@
+.layout {
+  position: relative; /* Grid Layout의 기본 위치 */
+  overflow: visible; /* 드래그 가능한 공간 제한 해제 */
+}
+
+.grid-item {
+  display: flex; /* 아이템 내용 중앙 정렬 */
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.react-grid-item {
+  position: relative;
+  border: 1px solid #ddd;
+}
+
+.react-resizable-handle {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background: #ccc;
+  bottom: 0;
+  right: 0;
+  cursor: se-resize; /* 모서리 드래그 커서 */
+}
+
+.will-change-transform {
+  @apply transform; /* 기본 변환 활성화 */
+  will-change: transform;
+}
+
+.layout .react-grid-item {
+  border: 1px solid #4e4e4e; /* 투명한 border로 설정 */
+}
+
+/* widget에만 border를 없애기 */
+.widget-item {
+  border: none !important; /* border를 없애기 */
+}
+
+/* React Grid Item의 드래그 또는 리사이즈 중 나타나는 그림자 색상 및 스타일 수정 */
+.layout .react-grid-item.react-draggable-dragging,
+.layout .react-grid-item.react-resizable-resizing {
+  box-shadow: 0 0 10px 4px rgba(128, 203, 196, 0.3) !important; /* 그림자 색상 및 투명도 조정 */
+}
+
+/* 드래그 중인 아이템이 들어갈 자리에 나타나는 배경 색상 수정 */
+.layout .react-grid-item.react-draggable-dragging ~ .react-grid-item {
+  background-color: rgba(128, 203, 196, 0.3) !important;
+}
+
+/* 드래그 중인 대상이 들어갈 자리에 나타나는 하이라이트 배경 색상 수정 */
+.layout .react-grid-placeholder {
+  background-color: rgba(128, 203, 196, 0.3) !important;
+}
+
+/* React-Tabulator 테이블의 배경색과 텍스트 색상 변경 */
+.react-tabulator {
+  background-color: #2e2e2e !important; /* 배경색 */
+}
+
+.react-tabulator .tabulator-header {
+  background-color: #2e2e2e !important; /* 헤더 배경 */
+  color: #dfdfdf !important; /* 헤더 텍스트 색상 */
+}
+
+.react-tabulator .tabulator-cell {
+  background-color: #2e2e2e !important; /* 셀 배경 */
+  color: #dfdfdf !important; /* 셀 텍스트 색상 */
+  border: 1px solid #dfdfdf !important; /* 셀 구분선 색상 */
+}
+
+.react-tabulator .tabulator-row {
+  border-bottom: 1px solid #dfdfdf !important; /* 행 구분선 색상 */
+}
+
+.react-tabulator .tabulator-footer {
+  background-color: #2e2e2e !important; /* 푸터 배경 */
+  color: #dfdfdf !important; /* 푸터 텍스트 색상 */
+}
+
+.react-tabulator .tabulator-sortable {
+  color: #dfdfdf !important; /* 정렬 가능한 셀 텍스트 색상 */
+}
+
+.react-tabulator .tabulator-selected {
+  background-color: #444444 !important; /* 선택된 셀 배경 */
+  color: #dfdfdf !important; /* 선택된 셀 텍스트 색상 */
+}
+
+.react-tabulator .tabulator-header .tabulator-col {
+  border-right: 1px solid #dfdfdf !important; /* 헤더 셀 구분선 */
+}
+
+/* React-Tabulator 스타일 */
+.custom-tabulator {
+  background-color: #333333 !important; /* 배경색 설정 */
+  color: #dfdfdf !important; /* 텍스트 색상 설정 */
+}
+
+.custom-tabulator .tabulator-header {
+  background-color: #333333 !important; /* 기본 헤더 배경색 */
+  color: #dfdfdf !important; /* 기본 헤더 텍스트 색상 */
+}
+
+/* 헤더 호버 시 색상 변경을 없애기 */
+.custom-tabulator .tabulator-header:hover {
+  background-color: #333333 !important; /* 호버 상태에서 배경색을 기본 배경으로 유지 */
+  color: #dfdfdf !important; /* 호버 상태에서도 텍스트 색상 유지 */
+}
+
+/* 헤더 셀에 대한 호버 상태 처리 */
+.custom-tabulator .tabulator-header .tabulator-col:hover {
+  background-color: #333333 !important; /* 셀 호버 시 배경색 유지 */
+  color: #dfdfdf !important; /* 셀 텍스트 색상 유지 */
+}
+
+.custom-tabulator .tabulator-cell {
+  background-color: #333333 !important; /* 셀 배경색 */
+  color: #dfdfdf !important; /* 셀 텍스트 색상 */
+  border-right: 1px solid #444444 !important; /* 셀 오른쪽 구분선 */
+  border-bottom: 1px solid #444444 !important; /* 가로 구분선 추가 */
+}
+
+.custom-tabulator .tabulator-row {
+  /* 행 구분선 제거 */
+  border-bottom: none !important; /* 행 구분선 제거 */
+}
+
+.custom-tabulator .tabulator-footer {
+  background-color: #333333 !important; /* 푸터 배경색 */
+  color: #dfdfdf !important; /* 푸터 텍스트 색상 */
+}
+
+.custom-tabulator .tabulator-sortable {
+  color: #dfdfdf !important; /* 정렬 가능한 셀 텍스트 색상 */
+}
+
+.custom-tabulator .tabulator-selected {
+  background-color: #444444 !important; /* 선택된 셀 배경색 */
+  color: #dfdfdf !important; /* 선택된 셀 텍스트 색상 */
+}
+
+.custom-tabulator .tabulator-header .tabulator-col {
+  border-right: 1px solid #444444 !important; /* 헤더 셀 구분선 */
+}
+
+/* react-datepicker */
+.react-datepicker {
+  background-color: #333333 !important; /* 배경색 설정 */
+  color: #dfdfdf !important; /* 텍스트 색상 설정 */
+}
+
+.react-datepicker__header {
+  background-color: #444444 !important; /* 헤더 배경 */
+  color: #dfdfdf !important; /* 헤더 텍스트 색상 */
+}
+
+.react-datepicker__day,
+.react-datepicker__month-text {
+  color: #dfdfdf !important; /* 날짜 텍스트 색상 */
+}
+
+.react-datepicker__day:hover {
+  background-color: #555555 !important; /* 날짜 hover 색상 */
+}
+
+.react-datepicker__time-container {
+  background-color: #333333 !important; /* 시간 선택기 배경 */
+}
+
+.react-datepicker__time {
+  background-color: #333333 !important; /* 시간 선택기 배경 */
+}
+
+.react-datepicker__time-box {
+  background-color: #333333 !important; /* 시간 선택기 배경 */
+}
+
+.react-datepicker__time-list-item:hover {
+  background-color: #444444 !important; /* 시간 hover 색상 */
+}
+
+.react-datepicker__input-container input {
+  background-color: #333333 !important; /* 입력창 배경색 */
+  color: #dfdfdf !important; /* 입력창 텍스트 색상 */
+  border: 1px solid #444444 !important; /* 입력창 테두리 */
+}
+
+/* Background for the entire date picker (calendar + time picker) */
+.react-datepicker {
+  background-color: #2e2e2e !important; /* Set dark background for the whole date picker */
+  color: #dfdfdf !important; /* Text color for date picker */
+  border: 1px solid #6e6e6e !important;
+}
+
+/* Background for the calendar */
+.react-datepicker__month-container {
+  background-color: #2e2e2e !important; /* Set dark background for the calendar */
+}
+
+/* Apply color for the highlighted date (current date) */
+.react-datepicker__day--highlighted {
+  background-color: #80cbc4 !important; /* Set highlighted date background */
+  color: #333333 !important; /* Set text color for highlighted date */
+}
+
+/* Apply color for selected date */
+.react-datepicker__day--selected {
+  background-color: #80cbc4 !important; /* Set selected date background */
+  color: #333333 !important; /* Set text color for selected date */
+}
+
+/* Time zone background */
+.react-datepicker__time-container {
+  background-color: #2e2e2e !important; /* Set dark background for the time picker */
+}
+
+/* Time list item color */
+.react-datepicker__time-list-item:hover {
+  color: #80cbc4 !important; /* Set time color */
+}
+
+.react-datepicker__time-list-item--selected {
+  background-color: #80cbc4 !important; /* Set time color */
+  color: #333333 !important;
+}
+
+/* Hover effect for time list item */
+.react-datepicker__time-list-item:hover {
+  background-color: #444444 !important; /* Set hover background color */
+  color: #dfdfdf !important; /* Set hover text color */
+}
+/* 스크롤바 배경색을 다크모드 색상으로 설정 */
+.react-datepicker__time-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px; /* 세로 및 가로 스크롤바에 동일한 스타일 적용 */
+}
+
+/* 스크롤바 Thumb (스크롤을 잡을 부분) */
+.react-datepicker__time-container::-webkit-scrollbar-thumb {
+  background-color: #80cbc4; /* 원하는 색으로 설정 */
+  border-radius: 4px;
+}
+
+/* 스크롤바 Track (배경 색상) */
+.react-datepicker__time-container::-webkit-scrollbar-track {
+  background-color: #2e2e2e; /* 다크모드 배경색 */
+}
