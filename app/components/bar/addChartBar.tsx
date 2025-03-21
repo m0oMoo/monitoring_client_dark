@@ -12,7 +12,7 @@ interface AddChartBarProps {
   modifiable?: boolean;
 }
 
-const DarkAddChartBar = ({
+const AddChartBar = ({
   isEdit,
   onCreateClick,
   onEditClick,
@@ -32,7 +32,7 @@ const DarkAddChartBar = ({
   );
 
   const handleGoBack = () => {
-    router.push("/dashboard6");
+    router.push("/dashboard");
   };
 
   return (
@@ -78,4 +78,4 @@ const DarkAddChartBar = ({
   );
 };
 
-export default DarkAddChartBar;
+export default AddChartBar;

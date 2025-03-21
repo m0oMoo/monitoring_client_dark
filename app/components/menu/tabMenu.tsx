@@ -22,10 +22,14 @@ const TabMenu: React.FC<TabMenuProps> = ({
   const pathname = usePathname();
 
   return (
-    <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-md z-50">
+    <div
+      className="absolute right-0 mt-2 w-40 bg-modern-bg shadow-lg
+    border border-modern-border rounded-md z-50"
+    >
       {/* 수정 버튼 */}
       <button
-        className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+        className="flex items-center w-full px-4 py-2 text-sm text-modern-text 
+        hover:bg-modern-bg2 hover:rounded-t-md"
         onClick={(e) => {
           e.stopPropagation();
           setEditingTabIndex(index);
@@ -35,10 +39,13 @@ const TabMenu: React.FC<TabMenuProps> = ({
       >
         <Edit2 className="w-4 h-4 mr-2" /> 수정
       </button>
-
+      <div className="px-2">
+        <p className="h-[0.5px] bg-modern-border" />
+      </div>
       {/* 삭제 버튼 */}
       <button
-        className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+        className="flex items-center w-full px-4 py-2 text-sm text-red-400 
+        hover:bg-modern-bg2"
         onClick={(e) => {
           e.stopPropagation();
           if (
@@ -52,10 +59,13 @@ const TabMenu: React.FC<TabMenuProps> = ({
       >
         <Trash2 className="w-4 h-4 mr-2" /> 삭제
       </button>
-
+      <div className="px-2">
+        <p className="h-[0.5px] bg-modern-border" />
+      </div>
       {/* 복제 버튼 */}
       <button
-        className="flex items-center w-full px-4 py-2 text-sm text-navy-btn hover:bg-gray-100"
+        className="flex items-center w-full px-4 py-2 text-modern-text text-sm
+        hover:bg-modern-bg2 hover:rounded-b-md"
         onClick={(e) => {
           e.stopPropagation();
           handleTabClone(index);
