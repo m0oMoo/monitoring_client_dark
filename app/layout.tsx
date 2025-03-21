@@ -1,6 +1,17 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import "../../public/style/custom.css";
+import "react-grid-layout/css/styles.css";
+import "react-resizable/css/styles.css";
+import "react-tabulator/lib/styles.css";
+import "react-datepicker/dist/react-datepicker.css";
+
+// import "react-tabulator/lib/css/tabulator_materialize.min.css";
+// import "react-tabulator/lib/css/tabulator.min.css";
+// import "react-tabulator/lib/css/tabulator_simple.min.css";
+import "react-tabulator/lib/css/tabulator_midnight.min.css";
+// import "react-tabulator/lib/css/tabulator_modern.min.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
