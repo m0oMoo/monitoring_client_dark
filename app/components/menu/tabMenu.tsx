@@ -9,6 +9,7 @@ interface TabMenuProps {
   setMenuOpenIndex: (index: string | null) => void;
   handleTabDelete: (index: string) => void;
   handleTabClone: (dashboardId: string) => void;
+  className?: string;
 }
 
 const TabMenu: React.FC<TabMenuProps> = ({
@@ -18,13 +19,14 @@ const TabMenu: React.FC<TabMenuProps> = ({
   setMenuOpenIndex,
   handleTabDelete,
   handleTabClone,
+  className,
 }) => {
   const pathname = usePathname();
 
   return (
     <div
-      className="absolute right-0 mt-2 w-40 bg-modern-bg shadow-lg
-    border border-modern-border rounded-md z-50"
+      className={`absolute right-0 mt-2 w-40 bg-modern-bg shadow-lg
+    border border-modern-border rounded-md z-50 `}
     >
       {/* 수정 버튼 */}
       <button
@@ -48,12 +50,7 @@ const TabMenu: React.FC<TabMenuProps> = ({
         hover:bg-modern-bg2"
         onClick={(e) => {
           e.stopPropagation();
-          if (
-            typeof window !== "undefined" &&
-            window.confirm("대시보드를 삭제하시겠습니까?")
-          ) {
-            handleTabDelete(index);
-          }
+          handleTabDelete(index);
           setMenuOpenIndex(null);
         }}
       >
