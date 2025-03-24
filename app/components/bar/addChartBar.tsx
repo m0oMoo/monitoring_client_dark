@@ -9,6 +9,7 @@ interface AddChartBarProps {
   onCreateClick: () => void;
   onEditClick?: () => void;
   onSaveClick?: () => void;
+  onCancelClick?: () => void;
   gridCols?: number;
   onGridChange?: (change: number) => void;
   gridVisible?: boolean;
@@ -21,6 +22,7 @@ const AddChartBar = ({
   onCreateClick,
   onEditClick,
   onSaveClick,
+  onCancelClick,
   gridCols,
   onGridChange,
   gridVisible = false,
@@ -139,6 +141,14 @@ const AddChartBar = ({
       {/* 버튼들 */}
       <div className="flex flex-row gap-5">
         <div className="flex flex-row gap-2 text-sm1">
+          {!isEdit && (
+            <button
+              className="hover:bg-modern-point_20 bg-modern-point_10 px-2 py-0.5 text-modern-point border-modern-point"
+              onClick={onCancelClick}
+            >
+              cancel
+            </button>
+          )}
           {modifiable && (
             <button
               className="hover:bg-modern-point_20 bg-modern-point_10 px-2 py-0.5 text-modern-point border-modern-point"
