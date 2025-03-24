@@ -1,24 +1,10 @@
 "use client";
 
+import { WidgetOptionData, WidgetType } from "@/types/dashboard";
 import { createContext, useContext, useState, ReactNode } from "react";
 
-export type WidgetType = "stat" | "card" | "cardWithChart" | "numberOnly";
-
-interface WidgetOptions {
-  widgetType: WidgetType;
-  label: string;
-  maxValue: number;
-  thresholds: number[];
-  colors: string[];
-  subText: string;
-  changePercent: number;
-  chartData: number[];
-  widgetBackgroundColor: string;
-  textColor: string;
-  unit: string;
-  arrowVisible: boolean;
-  widgetData: { label: string; data: any } | null;
-  setWidgetOptions: (options: Partial<WidgetOptions>) => void;
+export interface WidgetOptions extends WidgetOptionData {
+  setWidgetOptions: (options: Partial<WidgetOptionData>) => void;
   setWidgetType: (type: WidgetType) => void;
   setWidgetData: (data: { label: string; data: any } | null) => void;
 }
