@@ -1,4 +1,4 @@
-import { Dataset } from "../context/chartOptionContext";
+import { Dataset } from "@/types/dashboard";
 
 export const convertToTable = (datasets: Dataset[]) => {
   if (!datasets || datasets.length === 0) return { headers: [], rows: [] };
