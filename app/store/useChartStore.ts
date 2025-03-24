@@ -1,9 +1,9 @@
 import { create } from "zustand";
 import { persist, devtools } from "zustand/middleware";
 import { v4 as uuidv4 } from "uuid";
-import { Dataset } from "../context/chartOptionContext";
 import { ChartOptions } from "../types/options";
 import { useDashboardStore } from "./useDashboardStore";
+import { Dataset } from "@/types/dashboard";
 
 interface GridPosition {
   x: number;
@@ -16,7 +16,7 @@ export interface Chart {
   chartId: string;
   chartOptions: ChartOptions;
   datasets: Dataset[];
-  gridPos: GridPosition; // gridPos를 필수 필드로 변경
+  gridPos: GridPosition;
 }
 
 interface ChartStore {
