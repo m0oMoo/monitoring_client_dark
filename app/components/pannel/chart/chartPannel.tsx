@@ -1,4 +1,4 @@
-import { Dataset } from "@/context/chartOptionContext";
+import { Dataset } from "@/types/dashboard";
 import {
   Chart as ChartJS,
   CategoryScale,
