@@ -30,10 +30,21 @@ const Dashboard2Page = () => {
   );
 
   // 대시보드 삭제
-  const handleTabDelete = (dashboardId: string) => {};
+  const handleTabDelete = (dashboardId: string) => {
+    const dashboard = dashboardList.find((db) => db.id === dashboardId);
+    if (dashboard) {
+      if (window.confirm(`"${dashboard.label}" 대시보드를 삭제하시겠습니까?`)) {
+        useDashboardStore2.getState().deleteDashboard(dashboardId);
+        setAlertMessage("대시보드가 삭제되었습니다.");
+      }
+    }
+  };
 
   // 대시보드 복제 (차트 & 위젯 포함)
-  const handleTabClone = (dashboardId: string) => {};
+  const handleTabClone = (dashboardId: string) => {
+    useDashboardStore2.getState().cloneDashboard(dashboardId);
+    setAlertMessage("대시보드가 복제되었습니다.");
+  };
 
   const handleTabClick = (tab: any) => {
     router.push(`/detail2?id=${tab.id}`);
@@ -90,7 +101,7 @@ const Dashboard2Page = () => {
                 <MoreVertical
                   className="text-text3 cursor-pointer hover:text-text2"
                   onClick={(e) => {
-                    e.stopPropagation(); // 메뉴 클릭 유지
+                    e.stopPropagation(); 
                     setMenuOpenIndex(menuOpenIndex === tab.id ? null : tab.id);
                   }}
                 />
