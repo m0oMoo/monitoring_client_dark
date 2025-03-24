@@ -33,7 +33,6 @@ const DetailDashboard = () => {
 
   const {
     getDashboardById,
-    deletePannelFromDashboard,
     clonePannelToDashboard,
     dashboardList,
     addDashboard,
@@ -179,6 +178,59 @@ const DetailDashboard = () => {
     }
   }, [dashboard]);
 
+  const handleCancel = () => {
+    // 원래 대시보드 상태로 복원
+    if (dashboard) {
+      setPanels(dashboard.pannels);
+
+      // 패널들의 레이아웃 정보 복원
+      const originalLayout = dashboard.pannels.map((panel) => ({
+        i: panel.pannelId,
+        x: panel.gridPos.x,
+        y: panel.gridPos.y,
+        w: panel.gridPos.w,
+        h: panel.gridPos.h,
+        minW:
+          panel.pannelType === "widget" ? MIN_WIDGET_WIDTH : MIN_CHART_WIDTH,
+        minH:
+          panel.pannelType === "widget" ? MIN_WIDGET_HEIGHT : MIN_CHART_HEIGHT,
+      }));
+
+      setGridLayout(originalLayout);
+    }
+    setIsEditing(false);
+  };
+
+  const handlePanelDelete = (pannelId: string) => {
+    if (isEditing) {
+      // Edit 모드에서만 삭제 가능
+      // 패널 리스트에서만 삭제 (실제 저장은 Save 버튼 클릭 시)
+      const filteredPanels = panels.filter(
+        (panel) => panel.pannelId !== pannelId
+      );
+      setPanels(filteredPanels);
+
+      // 레이아웃에서도 삭제
+      const filteredLayout = gridLayout.filter((item) => item.i !== pannelId);
+      setGridLayout(filteredLayout);
+
+      setAlertMessage(
+        "패널이 삭제되었습니다. 저장하려면 Save 버튼을 클릭하세요."
+      );
+    } else {
+      setAlertMessage("편집 모드에서만 패널을 삭제할 수 있습니다.");
+    }
+  };
+
+  // 패널 수정으로 이동하는 함수 (라우팅)
+  const handlePanelEdit = (pannelId: string) => {
+    if (isEditing) {
+      router.push(`/d2?id=${dashboardId}&chartId=${pannelId}`);
+    } else {
+      setAlertMessage("편집 모드에서만 패널을 수정할 수 있습니다.");
+    }
+  };
+
   return (
     <div className="bg-modern-bg min-h-[calc(100vh-80px)]">
       <AddChartBar
@@ -189,6 +241,7 @@ const DetailDashboard = () => {
         gridVisible={true}
         modifiable={true}
         onEditClick={handleEditClick}
+        onCancelClick={handleCancel}
         onCallback={(title, desc) => {
           setTitle(title);
           setDescription(desc);
@@ -236,37 +289,50 @@ const DetailDashboard = () => {
             <div
               key={panel.pannelId}
               data-grid={layout}
-              className="drag-handle cursor-grab"
+              //   className="drag-handle cursor-grab"
             >
-              <div className="bg-modern-bg p-2 h-full flex flex-col relative">
-                <div className="absolute top-2 right-2 z-10 pointer-events-auto">
+              {isEditing && (
+                <div
+                  className="absolute top-2 right-2 z-10"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                  }}
+                >
                   <MoreVertical
                     className="text-text3 cursor-pointer hover:text-text2"
                     onClick={(e) => {
                       e.stopPropagation();
+                      e.preventDefault();
                       setMenuOpenIndex(
                         menuOpenIndex === panel.pannelId ? null : panel.pannelId
                       );
                     }}
                   />
                   {menuOpenIndex === panel.pannelId && (
-                    <TabMenu
-                      index={panel.pannelId}
-                      setEditingTabIndex={() =>
-                        router.push(
-                          `/d2?id=${dashboardId}&chartId=${panel.pannelId}`
-                        )
-                      }
-                      setIsModalOpen={() => {}}
-                      setMenuOpenIndex={setMenuOpenIndex}
-                      handleTabDelete={() =>
-                        deletePannelFromDashboard(dashboardId!, panel.pannelId)
-                      }
-                      handleTabClone={handleTabClone}
-                    />
+                    <div
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                      }}
+                    >
+                      <TabMenu
+                        index={panel.pannelId}
+                        setEditingTabIndex={() =>
+                          handlePanelEdit(panel.pannelId)
+                        }
+                        setIsModalOpen={() => {}}
+                        setMenuOpenIndex={setMenuOpenIndex}
+                        handleTabDelete={() =>
+                          handlePanelDelete(panel.pannelId)
+                        }
+                        handleTabClone={handleTabClone}
+                      />
+                    </div>
                   )}
                 </div>
-
+              )}
+              <div className="drag-handle cursor-grab bg-modern-bg p-2 h-full flex flex-col relative">
                 <h2 className="text-base font-normal mb-2 text-modern-text">
                   {panel.pannelType === "widget"
                     ? panel.pannelOptions.label
