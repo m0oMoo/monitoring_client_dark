@@ -23,6 +23,7 @@ import {
   MIN_WIDGET_WIDTH,
 } from "@/data/chart/chartDetail";
 import { Dashboard, Dataset } from "@/types/dashboard";
+import { useDashboardContext } from "@/context/dashboardContext";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -32,6 +33,19 @@ const DetailDashboard = () => {
   const initialId = searchParams.get("id");
 
   const {
+    isEdit,
+    dashboardId,
+    title,
+    description,
+    panels,
+    setIsEdit,
+    setTitle,
+    setDescription,
+    setDashboardId,
+    setPanels,
+    resetDashboardState,
+  } = useDashboardContext();
+  const {
     getDashboardById,
     clonePannelToDashboard,
     dashboardList,
@@ -39,7 +53,6 @@ const DetailDashboard = () => {
     updateDashboard,
   } = useDashboardStore2();
 
-  const [dashboardId, setDashboardId] = useState<string | null>(initialId);
   const dashboard = dashboardId ? getDashboardById(dashboardId) : null;
 
   const [from, setFrom] = useState<string | null>(null);
@@ -54,11 +67,8 @@ const DetailDashboard = () => {
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
   const [alertMessage, setAlertMessage] = useState<string>("");
   const [gridLayout, setGridLayout] = useState<Layout[]>([]);
-  const [isEditing, setIsEditing] = useState<boolean>(false);
-  const [title, setTitle] = useState<string>("");
-  const [description, setDescription] = useState<string>("");
-
-  const [panels, setPanels] = useState<any[]>([]); // 패널 상태 추가
+  const [dashboardTitle, setDashboardTitle] = useState<string>("");
+  const [dashboardDesc, setDashboardDesc] = useState<string>("");
 
   const layouts = useMemo(() => ({ lg: gridLayout }), [gridLayout]);
 
@@ -86,7 +96,7 @@ const DetailDashboard = () => {
       setPanels(updatedPanels);
 
       // 필요시 저장
-      if (!isEditing) {
+      if (!isEdit) {
         updateDashboard({
           ...dashboard,
           pannels: updatedPanels,
@@ -126,10 +136,10 @@ const DetailDashboard = () => {
   };
 
   const handleEditClick = () => {
-    if (isEditing) {
+    if (isEdit) {
       handleSaveDashboard(); // 저장 버튼 클릭 시 저장 처리
     }
-    setIsEditing((prev) => !prev);
+    setIsEdit(!isEdit);
   };
 
   const handleTabClone = (itemId: string) => {
@@ -198,11 +208,11 @@ const DetailDashboard = () => {
 
       setGridLayout(originalLayout);
     }
-    setIsEditing(false);
+    setIsEdit(false);
   };
 
   const handlePanelDelete = (pannelId: string) => {
-    if (isEditing) {
+    if (isEdit) {
       // Edit 모드에서만 삭제 가능
       // 패널 리스트에서만 삭제 (실제 저장은 Save 버튼 클릭 시)
       const filteredPanels = panels.filter(
@@ -224,18 +234,32 @@ const DetailDashboard = () => {
 
   // 패널 수정으로 이동하는 함수 (라우팅)
   const handlePanelEdit = (pannelId: string) => {
-    if (isEditing) {
-      router.push(`/d2?id=${dashboardId}&chartId=${pannelId}`);
+    if (isEdit) {
+      router.push(`/detail2/d?id=${dashboardId}&chartId=${pannelId}`);
     } else {
       setAlertMessage("편집 모드에서만 패널을 수정할 수 있습니다.");
     }
   };
 
+  const handleCreateClick = () => {
+    if (dashboardId) {
+      router.push(`/detail2/d?id=${dashboardId}`);
+    } else {
+      router.push(`/detail2/d`);
+    }
+  };
+
+  useEffect(() => {
+    setTitle(dashboardTitle);
+    setDescription(dashboardDesc);
+    console.log("업데이트 되었습니다.", title, description);
+  }, [dashboardDesc, dashboardTitle]);
+
   return (
     <div className="bg-modern-bg min-h-[calc(100vh-80px)]">
       <AddChartBar
-        isEdit={!isEditing}
-        onCreateClick={() => router.push(`/d2?id=${dashboardId}`)}
+        isEdit={!isEdit}
+        onCreateClick={handleCreateClick}
         gridCols={2}
         onGridChange={() => {}}
         gridVisible={true}
@@ -243,8 +267,8 @@ const DetailDashboard = () => {
         onEditClick={handleEditClick}
         onCancelClick={handleCancel}
         onCallback={(title, desc) => {
-          setTitle(title);
-          setDescription(desc);
+          setDashboardTitle(title);
+          setDashboardDesc(desc);
         }}
       />
 
@@ -263,8 +287,8 @@ const DetailDashboard = () => {
         className="layout"
         layouts={layouts}
         rowHeight={70}
-        isDraggable={isEditing}
-        isResizable={isEditing}
+        isDraggable={isEdit}
+        isResizable={isEdit}
         compactType={null}
         preventCollision={true}
         onLayoutChange={handleLayoutChange}
@@ -291,7 +315,7 @@ const DetailDashboard = () => {
               data-grid={layout}
               //   className="drag-handle cursor-grab"
             >
-              {isEditing && (
+              {isEdit && (
                 <div
                   className="absolute top-2 right-2 z-10"
                   onClick={(e) => {
