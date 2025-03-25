@@ -23,6 +23,7 @@ import {
   MIN_WIDGET_WIDTH,
 } from "@/data/chart/chartDetail";
 import { Dashboard, Dataset } from "@/types/dashboard";
+import { useDraftDashboardStore } from "@/store/useDraftDashboardStore";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -39,9 +40,12 @@ const DetailDashboard = () => {
     updateDashboard,
   } = useDashboardStore2();
 
-  const [dashboardId, setDashboardId] = useState<string | null>(initialId);
-  const dashboard = dashboardId ? getDashboardById(dashboardId) : null;
+  const { draftDashboard } = useDraftDashboardStore();
 
+  console.log("draftDashboard", draftDashboard);
+
+  const [dashboardId, setDashboardId] = useState<string>(initialId || "1");
+  const [dashboard, setDashboard] = useState<Dashboard>();
   const [from, setFrom] = useState<string | null>(null);
   const [to, setTo] = useState<string | null>(null);
   const [refreshTime, setRefreshTime] = useState<number | "autoType">(10);
@@ -58,15 +62,32 @@ const DetailDashboard = () => {
   const [title, setTitle] = useState<string>("");
   const [description, setDescription] = useState<string>("");
 
-  const [panels, setPanels] = useState<any[]>([]); // 패널 상태 추가
+  const [panels, setPanels] = useState<any[]>([]);
 
   const layouts = useMemo(() => ({ lg: gridLayout }), [gridLayout]);
 
+  // 대시보드 및 패널 로딩
+  useEffect(() => {
+    // draftDashboard가 있을 때만 설정
+    if (dashboardId === draftDashboard?.id) {
+      console.log("draftDashboard", draftDashboard);
+      setDashboard(draftDashboard); // 기존 대시보드 로드
+    } else {
+      const fetchedDashboard = getDashboardById(dashboardId);
+      if (fetchedDashboard) {
+        setDashboard(fetchedDashboard); // 기존 대시보드 로드
+      } else {
+        console.log("대시보드가 없습니다."); // 대시보드가 없을 경우 로깅
+      }
+    }
+  }, [dashboardId, draftDashboard]); // `dashboardId`와 `draftDashboard`가 변경될 때마다 실행
+
+  console.log(dashboardId);
+  console.log(dashboard);
+
   const handleLayoutChange = (layout: Layout[]) => {
     setGridLayout(layout);
-
-    // 패널 위치 정보 업데이트
-    if (dashboard && dashboardId) {
+    if (dashboard) {
       const updatedPanels = panels.map((panel) => {
         const updatedLayout = layout.find((item) => item.i === panel.pannelId);
         if (updatedLayout) {
@@ -82,10 +103,7 @@ const DetailDashboard = () => {
         }
         return panel;
       });
-
       setPanels(updatedPanels);
-
-      // 필요시 저장
       if (!isEditing) {
         updateDashboard({
           ...dashboard,
@@ -95,8 +113,6 @@ const DetailDashboard = () => {
     }
   };
 
-  // 대시보드 및 패널 저장
-  // 대시보드 새로 생성할 때
   const handleSaveDashboard = () => {
     if (panels.length === 0) {
       setAlertMessage(
@@ -106,22 +122,22 @@ const DetailDashboard = () => {
     }
 
     const updatedDashboard: Dashboard = {
-      id: dashboardId || uuidv4(), // 대시보드 수정 시 기존 ID를 사용하고, 새 대시보드인 경우 새 ID 생성
+      id: dashboardId === draftDashboard?.id ? draftDashboard?.id : dashboardId,
       label: title,
       description,
-      pannels: panels, // 저장된 패널 정보
+      pannels: panels,
     };
 
-    // 기존 대시보드 수정
-    if (dashboardId) {
+    if (dashboardId !== draftDashboard?.id) {
+      setAlertMessage("기존 대시보드가 업데이트되었습니다.");
       updateDashboard(updatedDashboard); // 기존 대시보드 업데이트
-      setAlertMessage("대시보드 및 패널 정보 저장 완료!");
     } else {
-      // 새로 대시보드 생성
-      const newId = addDashboard(updatedDashboard); // 새 대시보드 추가
+      setAlertMessage("임시 대시보드가 저장되었습니다.");
+      // draft 대시보드를 저장
+      addDashboard(updatedDashboard);
+      const newId = uuidv4();
       setDashboardId(newId);
-      router.replace(`/detail2?id=${newId}`);
-      setAlertMessage("새로운 대시보드가 생성되었습니다.");
+      router.replace(`/detail2?id=${newId}`); // 새 대시보드 상세 페이지로 이동
     }
   };
 
