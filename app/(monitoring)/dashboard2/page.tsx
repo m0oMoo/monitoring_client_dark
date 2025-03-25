@@ -8,10 +8,12 @@ import Alert from "@/components/alert/alert";
 import TabMenu from "@/components/menu/tabMenu";
 import SearchInput from "@/components/search/searchInput";
 import { useDashboardStore2 } from "@/store/useDashboard2Store";
+import { useDraftDashboardStore } from "@/store/useDraftDashboardStore";
 
 const Dashboard2Page = () => {
   const router = useRouter();
   const { dashboardList } = useDashboardStore2();
+  const { startDraftDashboard } = useDraftDashboardStore();
 
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [editingTabIndex, setEditingTabIndex] = useState<string | null>(null);
@@ -59,6 +61,20 @@ const Dashboard2Page = () => {
     }
   }, [alertMessage]);
 
+  // 대시보드 추가 버튼 클릭 시 처리
+  const handleAddDashboard = async () => {
+    const newDashboardId = uuidv4(); // 임시 대시보드 아이디 생성
+
+    // 초안 대시보드 시작 (여기서 label, description 등을 설정할 수 있음)
+    startDraftDashboard({
+      id: newDashboardId,
+      label: "New Dashboard", // 대시보드 이름
+      description: "Auto-generated draft dashboard", // 대시보드 설명
+    });
+
+    // 대시보드 저장 후 이동
+    router.push(`/detail2?id=${newDashboardId}`); // 새 대시보드 아이디로 이동
+  };
   return (
     <div
       className="bg-modern-bg text-modern-text min-h-screen p-4 pt-[44px]"
@@ -74,7 +90,7 @@ const Dashboard2Page = () => {
             onSearchChange={handleSearchChange}
           />
           <button
-            onClick={() => router.push("/detail2")} // ✅ 단순 이동
+            onClick={handleAddDashboard}
             className="flex bg-modern-point_10 py-1.5 px-2 text-modern-point border border-modern-point text-sm
   hover:bg-modern-point_20 justify-self-end"
           >
@@ -101,7 +117,7 @@ const Dashboard2Page = () => {
                 <MoreVertical
                   className="text-text3 cursor-pointer hover:text-text2"
                   onClick={(e) => {
-                    e.stopPropagation(); 
+                    e.stopPropagation();
                     setMenuOpenIndex(menuOpenIndex === tab.id ? null : tab.id);
                   }}
                 />
