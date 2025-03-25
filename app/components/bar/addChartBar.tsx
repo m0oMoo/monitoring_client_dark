@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useDashboardStore2 } from "@/store/useDashboard2Store";
 import { useState, useEffect } from "react";
+import { useDashboardContext } from "@/context/dashboardContext";
 
 interface AddChartBarProps {
   isEdit: boolean;
@@ -15,6 +16,8 @@ interface AddChartBarProps {
   gridVisible?: boolean;
   modifiable?: boolean;
   onCallback?: (title: string, description: string) => void;
+  isEditingTitleValue?: boolean;
+  isEditingDescValue?: boolean;
 }
 
 const AddChartBar = ({
@@ -28,17 +31,20 @@ const AddChartBar = ({
   gridVisible = false,
   modifiable = false,
   onCallback,
+  isEditingTitleValue = true,
+  isEditingDescValue = true,
 }: AddChartBarProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const dashboardId = searchParams.get("id") || undefined;
+  const dashboardId = searchParams.get("id") || "1";
   const { getDashboardById, updateDashboard } = useDashboardStore2();
   const dashboard = dashboardId ? getDashboardById(dashboardId) : undefined;
 
-  const [title, setTitle] = useState<string | undefined>(undefined); // Initial value as undefined to handle hydration issue
-  const [description, setDescription] = useState<string | undefined>(undefined);
-  const [isEditingTitle, setIsEditingTitle] = useState(false);
-  const [isEditingDesc, setIsEditingDesc] = useState(false);
+  const { title, description, setTitle, setDescription } =
+    useDashboardContext();
+
+  const [isEditingTitle, setIsEditingTitle] = useState<boolean>(false);
+  const [isEditingDesc, setIsEditingDesc] = useState<boolean>(false);
 
   useEffect(() => {
     if (dashboard) {
@@ -84,55 +90,71 @@ const AddChartBar = ({
             Dashboard
           </span>
           &nbsp; {">"}
-          {isEditingTitle ? (
-            <input
-              value={title}
-              autoFocus
-              onChange={(e) => setTitle(e.target.value)}
-              onBlur={() => {
-                setIsEditingTitle(false);
-                handleSaveTitleDesc();
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  setIsEditingTitle(false);
-                  handleSaveTitleDesc();
-                }
-              }}
-              className="border bg-transparent px-2 py-0.5 rounded ml-1 text-modern-text w-64"
-            />
+          {isEditingTitleValue ? (
+            <>
+              {isEditingTitle ? (
+                <input
+                  value={title}
+                  autoFocus
+                  onChange={(e) => setTitle(e.target.value)}
+                  onBlur={() => {
+                    setIsEditingTitle(false);
+                    handleSaveTitleDesc();
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      setIsEditingTitle(false);
+                      handleSaveTitleDesc();
+                    }
+                  }}
+                  className="border bg-transparent px-2 py-0.5 rounded ml-1 text-modern-text w-64"
+                />
+              ) : (
+                <span
+                  onClick={() => setIsEditingTitle(true)}
+                  className="text-modern-text ml-1 cursor-pointer hover:underline"
+                >
+                  {title || "제목 없음"}
+                </span>
+              )}
+            </>
           ) : (
-            <span
-              onClick={() => setIsEditingTitle(true)}
-              className="text-modern-text ml-1 cursor-pointer hover:underline"
-            >
+            <span className="text-modern-text ml-1">
               {title || "제목 없음"}
             </span>
           )}
         </div>
-        {isEditingDesc ? (
-          <input
-            value={description}
-            autoFocus
-            onChange={(e) => setDescription(e.target.value)}
-            onBlur={() => {
-              setIsEditingDesc(false);
-              handleSaveTitleDesc();
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                setIsEditingDesc(false);
-                handleSaveTitleDesc();
-              }
-            }}
-            className="text-sm mt-1 text-modern-subtext bg-transparent border px-2 py-0.5 rounded"
-            placeholder="설명 입력"
-          />
+        {isEditingDescValue ? (
+          <>
+            {isEditingDesc ? (
+              <input
+                value={description}
+                autoFocus
+                onChange={(e) => setDescription(e.target.value)}
+                onBlur={() => {
+                  setIsEditingDesc(false);
+                  handleSaveTitleDesc();
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    setIsEditingDesc(false);
+                    handleSaveTitleDesc();
+                  }
+                }}
+                className="text-sm mt-1 text-modern-subtext bg-transparent border px-2 py-0.5 rounded"
+                placeholder="설명 입력"
+              />
+            ) : (
+              <p
+                onClick={() => setIsEditingDesc(true)}
+                className="text-sm mt-1 text-modern-subtext cursor-pointer hover:underline"
+              >
+                {description || "설명 없음"}
+              </p>
+            )}
+          </>
         ) : (
-          <p
-            onClick={() => setIsEditingDesc(true)}
-            className="text-sm mt-1 text-modern-subtext cursor-pointer hover:underline"
-          >
+          <p className="text-sm mt-1 text-modern-subtext">
             {description || "설명 없음"}
           </p>
         )}
