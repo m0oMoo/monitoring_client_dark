@@ -28,11 +28,14 @@ import { extractChartOptionData } from "@/types/extractChartOptionData";
 
 Chart.register(zoomPlugin);
 
-const ChartSection = () => {
+const PannelSection = () => {
   const router = useRouter();
   const params = useSearchParams();
-  const dashboardId = params.get("id") || "1";
+  const dashboardId = params.get("id");
   const chartId = params.get("chartId") || undefined;
+
+  const [title, setTitle] = useState<string>("");
+  const [description, setDescription] = useState<string>("");
 
   const { selectedSection, setSelectedSection } = useSelectedSection();
   const {
@@ -83,15 +86,19 @@ const ChartSection = () => {
     setWidgetOptions,
   } = useWidgetOptions();
 
-  const { addPannelToDashboard, updatePannelInDashboard, getDashboardById } =
-    useDashboardStore2();
+  const {
+    addPannelToDashboard,
+    updatePannelInDashboard,
+    getDashboardById,
+    addDashboard,
+  } = useDashboardStore2();
 
   const [from, setFrom] = useState<string | null>(null);
   const [to, setTo] = useState<string | null>(null);
   const [refreshTime, setRefreshTime] = useState<number | "autoType">(10);
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
 
-  const dashboard = getDashboardById(dashboardId);
+  const dashboard = getDashboardById(dashboardId || "1");
   const existingPannel = chartId
     ? dashboard?.pannels.find((p) => p.pannelId === chartId)
     : null;
@@ -121,11 +128,12 @@ const ChartSection = () => {
 
   const handleCreateClick = () => {
     const isEditing = !!existingPannel;
-    const panelId = isEditing ? chartId! : uuidv4();
+    const panelId = isEditing ? chartId! : uuidv4(); // 새로 생성된 패널에 ID 부여
     const gridPos = existingPannel?.gridPos || { x: 0, y: 0, w: 4, h: 4 };
 
     let newPannel: DashboardPannel;
 
+    // 패널 종류에 따라 옵션 설정
     if (selectedSection === "chartOption") {
       const chartOptions = extractChartOptionData({
         chartType,
@@ -206,18 +214,33 @@ const ChartSection = () => {
       };
     }
 
-    if (isEditing) {
-      updatePannelInDashboard(dashboardId, newPannel);
-    } else {
+    // 대시보드가 존재하는지 확인하고, 없으면 새 대시보드 생성
+    if (dashboardId && getDashboardById(dashboardId)) {
+      // 대시보드가 존재하면 패널을 추가하고, 페이지 이동
       addPannelToDashboard(dashboardId, newPannel);
-    }
+      router.push(`/detail2?id=${dashboardId}`);
+    } else {
+      // 대시보드가 없으면 새 대시보드를 생성하고 그 ID로 패널 추가
+      console.log("여기에 추가 됩니다.");
+      addDashboard({
+        id: dashboardId!,
+        label: title,
+        description,
+        pannels: [newPannel], // 새 대시보드에 패널 추가
+      });
 
-    router.push(`/detail2?id=${dashboardId}`);
+      router.push(`/detail2?id=${dashboardId}`); // 새 대시보드로 이동
+    }
   };
 
   return (
     <div className="mr-[300px] overflow-hidden">
-      <AddChartBar isEdit={true} onCreateClick={handleCreateClick} />
+      <AddChartBar
+        isEdit={true}
+        onCreateClick={handleCreateClick}
+        isEditingDescValue={false}
+        isEditingTitleValue={false}
+      />
 
       <TimeRangeBar
         from={from}
@@ -313,4 +336,4 @@ const ChartSection = () => {
   );
 };
 
-export default ChartSection;
+export default PannelSection;
