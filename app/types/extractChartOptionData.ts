@@ -1,0 +1,68 @@
+import { ChartOptions } from "@/context/chartOptionContext";
+import { ChartOptionData } from "./dashboard";
+
+export const extractChartOptionData = (
+  options: ChartOptions
+): ChartOptionData => {
+  const {
+    chartType,
+    titleText,
+    showLegend,
+    fill,
+    legendPosition,
+    legendColor,
+    tooltipBgColor,
+    isSingleColorMode,
+    borderColor,
+    backgroundColor,
+    borderColors,
+    backgroundColors,
+    hoverMode,
+    zoomMode,
+    zoomSensitivity,
+    xGridDisplay,
+    yGridDisplay,
+    crosshairColor,
+    showCrosshair,
+    crosshairWidth,
+    enableZoom,
+    radius,
+    tension,
+    tooltipMode,
+    crosshairOpacity,
+    displayMode,
+    tableData,
+    datasets,
+  } = options;
+
+  return {
+    chartType,
+    titleText,
+    showLegend,
+    fill,
+    legendPosition,
+    legendColor,
+    tooltipBgColor,
+    isSingleColorMode,
+    borderColor,
+    backgroundColor,
+    borderColors,
+    backgroundColors,
+    hoverMode,
+    zoomMode,
+    zoomSensitivity,
+    xGridDisplay,
+    yGridDisplay,
+    crosshairColor,
+    showCrosshair,
+    crosshairWidth,
+    enableZoom,
+    radius,
+    tension,
+    tooltipMode,
+    crosshairOpacity,
+    displayMode,
+    tableData,
+    datasets,
+  };
+};

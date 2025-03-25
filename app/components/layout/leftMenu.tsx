@@ -18,6 +18,7 @@ const MENU = [
   //   icon: LayoutGrid,
   //   link: "/d",
   // },
+  { id: 5, title: "Dashboard2", icon: LayoutGrid, link: "/dashboard2" },
 ];
 
 const LeftMenu = () => {

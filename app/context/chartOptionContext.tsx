@@ -1,49 +1,11 @@
 import React, { createContext, useContext, useState } from "react";
-import { DisplayMode } from "../types/options";
+import { ChartOptionData, Dataset, TableData } from "@/types/dashboard";
 
-export type Dataset = {
-  label: string;
-  data: number[];
-};
-
-type TableData = {
-  headers: string[];
-  rows: { label: string; values: number[] }[];
-};
-
-type ChartOptions = {
-  chartType: "bar" | "line" | "pie" | "doughnut";
-  showLegend: boolean;
-  fill: boolean;
-  legendPosition: "top" | "bottom" | "left" | "right";
-  legendColor: string;
-  isSingleColorMode: boolean;
-  borderColor: string;
-  backgroundColor: string;
-  borderColors: string[];
-  backgroundColors: string[];
-  titleText: string;
-  tooltipBgColor: string;
-  tooltipMode: "index" | "nearest";
-  hoverMode: "index" | "nearest";
-  zoomMode: "xy" | "x" | "y";
-  zoomSensitivity: number;
-  crosshairColor: string;
-  crosshairWidth: number;
-  crosshairOpacity: number;
-  xGridDisplay: boolean;
-  yGridDisplay: boolean;
-  showCrosshair: boolean;
-  enableZoom: boolean;
-  radius: number;
-  tension: number;
-  datasets: Dataset[];
-  displayMode: DisplayMode;
-  tableData: TableData;
-  setOptions: (options: Partial<ChartOptions>) => void;
+export interface ChartOptions extends ChartOptionData {
+  setOptions: (options: Partial<ChartOptionData>) => void;
   setDatasets: (datasets: Dataset[]) => void;
   toggleDisplayMode: () => void;
-};
+}
 
 const ChartOptionsContext = createContext<ChartOptions | undefined>(undefined);
 
@@ -57,7 +19,6 @@ export const ChartOptionsProvider = ({
     showLegend: true,
     fill: true,
     legendPosition: "top",
-    // 다크모드 일 때에는, #fff로 설정
     legendColor: "#fff",
     isSingleColorMode: false,
     borderColor: "rgba(220, 20, 60, 1)",
@@ -86,8 +47,8 @@ export const ChartOptionsProvider = ({
     radius: 3,
     tension: 0.3,
     datasets: [],
-    displayMode: "chart", // 🔹 기본값: 차트
-    tableData: { headers: [], rows: [] }, // 🔹 테이블 데이터 기본값
+    displayMode: "chart",
+    tableData: { headers: [], rows: [] },
     setOptions: () => {},
     setDatasets: () => {},
     toggleDisplayMode: () => {},
@@ -112,7 +73,7 @@ export const ChartOptionsProvider = ({
     return { headers, rows };
   };
 
-  const setOptions = (newOptions: Partial<ChartOptions>) => {
+  const setOptions = (newOptions: Partial<ChartOptionData>) => {
     setOptionsState((prev) => ({ ...prev, ...newOptions }));
   };
 
