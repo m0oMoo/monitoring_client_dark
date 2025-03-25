@@ -3,7 +3,6 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useDashboardStore2 } from "@/store/useDashboard2Store";
 import { useState, useEffect } from "react";
-import { useDashboardContext } from "@/context/dashboardContext";
 
 interface AddChartBarProps {
   isEdit: boolean;
@@ -40,9 +39,11 @@ const AddChartBar = ({
   const { getDashboardById, updateDashboard } = useDashboardStore2();
   const dashboard = dashboardId ? getDashboardById(dashboardId) : undefined;
 
-  const { title, description, setTitle, setDescription } =
-    useDashboardContext();
+  // const { title, description, setTitle, setDescription } =
+  //   useDashboardContext();
 
+  const [title, setTitle] = useState<string>("");
+  const [description, setDescription] = useState<string>("");
   const [isEditingTitle, setIsEditingTitle] = useState<boolean>(false);
   const [isEditingDesc, setIsEditingDesc] = useState<boolean>(false);
 
