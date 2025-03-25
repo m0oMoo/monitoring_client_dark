@@ -74,9 +74,11 @@ const Dashboard2Page = () => {
             onSearchChange={handleSearchChange}
           />
           <button
-            onClick={() => router.push("/detail2")} // ✅ 단순 이동
-            className="flex bg-modern-point_10 py-1.5 px-2 text-modern-point border border-modern-point text-sm
-  hover:bg-modern-point_20 justify-self-end"
+            onClick={() => {
+              const dashboardId = uuidv4();
+              router.push(`/detail2?id=${dashboardId}`);
+            }}
+            className="flex bg-modern-point_10 py-1.5 px-2 text-modern-point border border-modern-point text-sm hover:bg-modern-point_20 justify-self-end"
           >
             + 대시보드 추가
           </button>
@@ -101,7 +103,7 @@ const Dashboard2Page = () => {
                 <MoreVertical
                   className="text-text3 cursor-pointer hover:text-text2"
                   onClick={(e) => {
-                    e.stopPropagation(); 
+                    e.stopPropagation();
                     setMenuOpenIndex(menuOpenIndex === tab.id ? null : tab.id);
                   }}
                 />
