@@ -25,6 +25,7 @@ import CustomTable from "@/components/table/customTable";
 
 import { extractWidgetOptionData } from "@/types/extractWidgetOptionData";
 import { extractChartOptionData } from "@/types/extractChartOptionData";
+import { useDraftDashboardStore } from "@/store/useDraftDashboardStore";
 
 Chart.register(zoomPlugin);
 
@@ -85,6 +86,8 @@ const ChartSection = () => {
 
   const { addPannelToDashboard, updatePannelInDashboard, getDashboardById } =
     useDashboardStore2();
+  const { draftDashboard, startDraftDashboard, addPannelToDraft } =
+    useDraftDashboardStore();
 
   const [from, setFrom] = useState<string | null>(null);
   const [to, setTo] = useState<string | null>(null);
@@ -121,11 +124,12 @@ const ChartSection = () => {
 
   const handleCreateClick = () => {
     const isEditing = !!existingPannel;
-    const panelId = isEditing ? chartId! : uuidv4();
+    const panelId = isEditing ? chartId! : draftDashboard?.id;
     const gridPos = existingPannel?.gridPos || { x: 0, y: 0, w: 4, h: 4 };
 
     let newPannel: DashboardPannel;
 
+    // 차트 패널 생성
     if (selectedSection === "chartOption") {
       const chartOptions = extractChartOptionData({
         chartType,
@@ -171,13 +175,14 @@ const ChartSection = () => {
       });
 
       newPannel = {
-        pannelId: panelId,
+        pannelId: panelId || "1",
         pannelType: "chart",
         pannelOptions: chartOptions,
         datasets: chartOptions.datasets,
         gridPos,
       };
     } else {
+      // 위젯 패널 생성
       const widgetOptions = extractWidgetOptionData({
         widgetType,
         widgetData,
@@ -198,7 +203,7 @@ const ChartSection = () => {
       });
 
       newPannel = {
-        pannelId: panelId,
+        pannelId: panelId || "1",
         pannelType: "widget",
         pannelOptions: widgetOptions,
         datasets: [],
@@ -206,13 +211,24 @@ const ChartSection = () => {
       };
     }
 
-    if (isEditing) {
-      updatePannelInDashboard(dashboardId, newPannel);
-    } else {
-      addPannelToDashboard(dashboardId, newPannel);
+    // draft 대시보드에 패널 추가
+    if (draftDashboard) {
+      addPannelToDraft(newPannel);
+      // draft 대시보드로 이동
+      router.push(`/detail2?id=${draftDashboard.id}`);
     }
-
-    router.push(`/detail2?id=${dashboardId}`);
+    // 기존 대시보드가 있을 경우
+    else if (dashboardId) {
+      if (isEditing) {
+        // 기존 대시보드 패널 수정
+        updatePannelInDashboard(dashboardId, newPannel);
+      } else {
+        // 기존 대시보드에 새 패널 추가
+        addPannelToDashboard(dashboardId, newPannel);
+      }
+      // 기존 대시보드로 이동
+      router.push(`/detail2?id=${dashboardId}`);
+    }
   };
 
   return (
