@@ -80,7 +80,7 @@ const DetailDashboard = () => {
         console.log("대시보드가 없습니다."); // 대시보드가 없을 경우 로깅
       }
     }
-  }, [dashboardId, draftDashboard]); // `dashboardId`와 `draftDashboard`가 변경될 때마다 실행
+  }, [dashboardId, draftDashboard]);
 
   console.log(dashboardId);
   console.log(dashboard);
@@ -241,7 +241,7 @@ const DetailDashboard = () => {
   // 패널 수정으로 이동하는 함수 (라우팅)
   const handlePanelEdit = (pannelId: string) => {
     if (isEditing) {
-      router.push(`/d2?id=${dashboardId}&chartId=${pannelId}`);
+      router.push(`/d2?id=${dashboardId}&pannelId=${pannelId}`);
     } else {
       setAlertMessage("편집 모드에서만 패널을 수정할 수 있습니다.");
     }
