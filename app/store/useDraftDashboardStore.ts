@@ -14,7 +14,7 @@ interface DashboardStore {
   draftDashboard: DraftDashboard | null; // 단일 대시보드를 저장
   getDraftDashboardById: () => DraftDashboard | null; // draftDashboard 반환
   startDraftDashboard: (initialData: Partial<DraftDashboard>) => void;
-  addPannelToDraft: (pannel: DashboardPannel) => void;
+  addPannelToDraft: (pannel: DashboardPannel, isEdit: boolean) => void;
   cancelDraftDashboard: () => void;
   deleteDraftDashboard: () => void;
 }
@@ -37,12 +37,29 @@ export const useDraftDashboardStore = create<DashboardStore>()((set, get) => ({
     });
   },
 
-  addPannelToDraft: (pannel) => {
+  addPannelToDraft: (pannel, isEdit = false) => {
     set((state) => {
       if (!state.draftDashboard) {
         console.warn("Cannot add panel: No draft dashboard started");
         return state;
       }
+
+      if (isEdit) {
+        const updatedPannels = state.draftDashboard.pannels.map(
+          (existingPannel) =>
+            existingPannel.pannelId === pannel.pannelId
+              ? { ...existingPannel, ...pannel }
+              : existingPannel
+        );
+
+        return {
+          draftDashboard: {
+            ...state.draftDashboard,
+            pannels: updatedPannels,
+          },
+        };
+      }
+
       return {
         draftDashboard: {
           ...state.draftDashboard,
@@ -50,7 +67,7 @@ export const useDraftDashboardStore = create<DashboardStore>()((set, get) => ({
             ...state.draftDashboard.pannels,
             {
               ...pannel,
-              pannelId: uuidv4(), // 각 패널에 고유 ID 부여
+              pannelId: uuidv4(),
             },
           ],
         },
