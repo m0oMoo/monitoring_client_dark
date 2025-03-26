@@ -29,11 +29,11 @@ import { useDraftDashboardStore } from "@/store/useDraftDashboardStore";
 
 Chart.register(zoomPlugin);
 
-const ChartSection = () => {
+const PannelSection = () => {
   const router = useRouter();
   const params = useSearchParams();
   const dashboardId = params.get("id") || "1";
-  const chartId = params.get("chartId") || undefined;
+  const pannelId = params.get("pannelId") || undefined;
 
   const { selectedSection, setSelectedSection } = useSelectedSection();
   const {
@@ -86,17 +86,18 @@ const ChartSection = () => {
 
   const { addPannelToDashboard, updatePannelInDashboard, getDashboardById } =
     useDashboardStore2();
-  const { draftDashboard, startDraftDashboard, addPannelToDraft } =
-    useDraftDashboardStore();
+  const { draftDashboard, addPannelToDraft } = useDraftDashboardStore();
+  const dashboard = getDashboardById(dashboardId);
 
   const [from, setFrom] = useState<string | null>(null);
   const [to, setTo] = useState<string | null>(null);
   const [refreshTime, setRefreshTime] = useState<number | "autoType">(10);
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
 
-  const dashboard = getDashboardById(dashboardId);
-  const existingPannel = chartId
-    ? dashboard?.pannels.find((p) => p.pannelId === chartId)
+  const existingPannel = pannelId
+    ? dashboardId === draftDashboard?.id
+      ? draftDashboard?.pannels.find((p) => p.pannelId === pannelId)
+      : dashboard?.pannels.find((p) => p.pannelId === pannelId)
     : null;
 
   // 기존 패널 수정 시, context에 값 세팅
@@ -124,7 +125,7 @@ const ChartSection = () => {
 
   const handleCreateClick = () => {
     const isEditing = !!existingPannel;
-    const panelId = isEditing ? chartId! : draftDashboard?.id;
+    const panelId = isEditing ? pannelId! : draftDashboard?.id;
     const gridPos = existingPannel?.gridPos || { x: 0, y: 0, w: 4, h: 4 };
 
     let newPannel: DashboardPannel;
@@ -213,7 +214,7 @@ const ChartSection = () => {
 
     // draft 대시보드에 패널 추가
     if (draftDashboard) {
-      addPannelToDraft(newPannel);
+      addPannelToDraft(newPannel, isEditing);
       // draft 대시보드로 이동
       router.push(`/detail2?id=${draftDashboard.id}`);
     }
@@ -329,4 +330,4 @@ const ChartSection = () => {
   );
 };
 
-export default ChartSection;
+export default PannelSection;
