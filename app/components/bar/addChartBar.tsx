@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useDashboardStore2 } from "@/store/useDashboard2Store";
 import { useState, useEffect } from "react";
+import { useDraftDashboardStore } from "@/store/useDraftDashboardStore";
 
 interface AddChartBarProps {
   isEdit: boolean;
@@ -36,7 +37,10 @@ const AddChartBar = ({
   const router = useRouter();
   const searchParams = useSearchParams();
   const dashboardId = searchParams.get("id") || "1";
+
   const { getDashboardById, updateDashboard } = useDashboardStore2();
+  const { draftDashboard } = useDraftDashboardStore();
+
   const dashboard = dashboardId ? getDashboardById(dashboardId) : undefined;
 
   // const { title, description, setTitle, setDescription } =
@@ -51,6 +55,9 @@ const AddChartBar = ({
     if (dashboard) {
       setTitle(dashboard.label);
       setDescription(dashboard.description || "");
+    } else if (dashboardId === draftDashboard?.id) {
+      setTitle(draftDashboard.label);
+      setDescription(draftDashboard.description || "");
     }
   }, [dashboard]);
 
