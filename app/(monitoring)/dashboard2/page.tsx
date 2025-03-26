@@ -68,8 +68,8 @@ const Dashboard2Page = () => {
     // 초안 대시보드 시작 (여기서 label, description 등을 설정할 수 있음)
     startDraftDashboard({
       id: newDashboardId,
-      label: "New Dashboard", // 대시보드 이름
-      description: "Auto-generated draft dashboard", // 대시보드 설명
+      label: "새 대시보드", // 대시보드 이름
+      description: "대시보드 설명", // 대시보드 설명
     });
 
     // 대시보드 저장 후 이동
