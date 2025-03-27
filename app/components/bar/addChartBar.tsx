@@ -1,8 +1,7 @@
-"use client";
-
+import React, { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useDashboardStateStore } from "@/store/useDashboardStateStore";
 import { useDashboardStore2 } from "@/store/useDashboard2Store";
-import { useState, useEffect } from "react";
 import { useDraftDashboardStore } from "@/store/useDraftDashboardStore";
 
 interface AddChartBarProps {
@@ -11,11 +10,8 @@ interface AddChartBarProps {
   onEditClick?: () => void;
   onSaveClick?: () => void;
   onCancelClick?: () => void;
-  gridCols?: number;
   onGridChange?: (change: number) => void;
-  gridVisible?: boolean;
   modifiable?: boolean;
-  onCallback?: (title: string, description: string) => void;
   isEditingTitleValue?: boolean;
   isEditingDescValue?: boolean;
 }
@@ -26,11 +22,8 @@ const AddChartBar = ({
   onEditClick,
   onSaveClick,
   onCancelClick,
-  gridCols,
   onGridChange,
-  gridVisible = false,
   modifiable = false,
-  onCallback,
   isEditingTitleValue = true,
   isEditingDescValue = true,
 }: AddChartBarProps) => {
@@ -38,56 +31,65 @@ const AddChartBar = ({
   const searchParams = useSearchParams();
   const dashboardId = searchParams.get("id") || "1";
 
-  const { getDashboardById, updateDashboard } = useDashboardStore2();
+  const { getDashboardById } = useDashboardStore2();
   const { draftDashboard } = useDraftDashboardStore();
+  const { title, description, setTitle, setDescription } =
+    useDashboardStateStore();
 
-  const dashboard = dashboardId ? getDashboardById(dashboardId) : undefined;
-
-  // const { title, description, setTitle, setDescription } =
-  //   useDashboardContext();
-
-  const [title, setTitle] = useState<string>("");
-  const [description, setDescription] = useState<string>("");
   const [isEditingTitle, setIsEditingTitle] = useState<boolean>(false);
   const [isEditingDesc, setIsEditingDesc] = useState<boolean>(false);
 
+  // 대시보드 및 패널 로딩
   useEffect(() => {
-    if (dashboard) {
-      setTitle(dashboard.label);
-      setDescription(dashboard.description || "");
-    } else if (dashboardId === draftDashboard?.id) {
-      setTitle(draftDashboard.label);
-      setDescription(draftDashboard.description || "");
+    // draftDashboard가 있을 때만 설정
+    if (dashboardId === draftDashboard?.id) {
+      // title과 description이 실제로 변경된 경우에만 상태를 업데이트
+      if (
+        draftDashboard.label !== title ||
+        draftDashboard.description !== description
+      ) {
+        const updatedDraftDashboard = {
+          ...draftDashboard, // 기존 draftDashboard 정보
+          label: title, // 새로운 title 값
+          description: description, // 새로운 description 값
+        };
+        useDraftDashboardStore
+          .getState()
+          .updateDraftDashboard(updatedDraftDashboard); // 임시 대시보드 업데이트
+      }
+    } else {
+      const fetchedDashboard = getDashboardById(dashboardId);
+      if (fetchedDashboard) {
+        // title과 description이 실제로 변경된 경우에만 상태를 업데이트
+        if (
+          fetchedDashboard.label !== title ||
+          fetchedDashboard.description !== description
+        ) {
+          const updatedDashboard = {
+            ...fetchedDashboard, // 기존 대시보드 정보
+            label: title, // 새로운 title 값
+            description: description, // 새로운 description 값
+          };
+          useDashboardStore2.getState().updateDashboard(updatedDashboard); // 기존 대시보드 업데이트
+        }
+      } else {
+        console.log("대시보드가 없습니다."); // 대시보드가 없을 경우 로깅
+      }
     }
-  }, [dashboard]);
+  }, [dashboardId, draftDashboard, title, description, getDashboardById]);
 
   const handleGoBack = () => {
     router.push("/dashboard");
   };
 
   const handleSaveTitleDesc = () => {
-    if (dashboardId && dashboard) {
-      updateDashboard({
-        ...dashboard,
-        label: title!,
-        description: description!,
-      });
-    }
+    // 상태 업데이트: title과 description 변경 시 바로바로 Zustand로 저장
+    setTitle(title);
+    setDescription(description);
   };
 
-  useEffect(() => {
-    if (typeof title !== "undefined" && typeof description !== "undefined") {
-      if (onCallback) {
-        onCallback(title, description);
-      }
-    }
-  }, [title, description, onCallback]);
-
   return (
-    <div
-      className={`flex justify-between items-center mt-[44px] bg-modern-bg
-      border-b border-modern-border border-0.5 py-1.5 px-4`}
-    >
+    <div className="flex justify-between items-center mt-[44px] bg-modern-bg border-b border-modern-border border-0.5 py-1.5 px-4">
       {/* breadcrumb + 이름/설명 인라인 수정 */}
       <div>
         <div className="text-lg1 text-modern-text_disable">
@@ -104,15 +106,17 @@ const AddChartBar = ({
                 <input
                   value={title}
                   autoFocus
-                  onChange={(e) => setTitle(e.target.value)}
+                  onChange={(e) => {
+                    setTitle(e.target.value); // 실시간으로 Zustand 상태 업데이트
+                  }}
                   onBlur={() => {
                     setIsEditingTitle(false);
-                    handleSaveTitleDesc();
+                    handleSaveTitleDesc(); // 실시간 저장
                   }}
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
                       setIsEditingTitle(false);
-                      handleSaveTitleDesc();
+                      handleSaveTitleDesc(); // 실시간 저장
                     }
                   }}
                   className="border bg-transparent px-2 py-0.5 rounded ml-1 text-modern-text w-64"
@@ -138,15 +142,17 @@ const AddChartBar = ({
               <input
                 value={description}
                 autoFocus
-                onChange={(e) => setDescription(e.target.value)}
+                onChange={(e) => {
+                  setDescription(e.target.value); // 실시간으로 Zustand 상태 업데이트
+                }}
                 onBlur={() => {
                   setIsEditingDesc(false);
-                  handleSaveTitleDesc();
+                  handleSaveTitleDesc(); // 실시간 저장
                 }}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     setIsEditingDesc(false);
-                    handleSaveTitleDesc();
+                    handleSaveTitleDesc(); // 실시간 저장
                   }
                 }}
                 className="text-sm mt-1 text-modern-subtext bg-transparent border px-2 py-0.5 rounded"
