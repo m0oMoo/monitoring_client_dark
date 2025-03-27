@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
-import { MoreVertical } from "lucide-react";
+import { Camera, MoreVertical } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Alert from "@/components/alert/alert";
 import TabMenu from "@/components/menu/tabMenu";
@@ -89,6 +89,15 @@ const Dashboard2Page = () => {
             searchQuery={searchQuery}
             onSearchChange={handleSearchChange}
           />
+          <button
+            onClick={() => {
+              router.push("/snapshot");
+            }}
+            className="flex items-center gap-2 bg-transparent py-1.5 px-2 text-modern-text border-modern-text text-sm
+  hover:bg-modern-white_10 justify-self-end border"
+          >
+            <Camera size={18} className="text-modern-text" /> 스냅샷 보기
+          </button>
           <button
             onClick={handleAddDashboard}
             className="flex bg-modern-point_10 py-1.5 px-2 text-modern-point border border-modern-point text-sm
