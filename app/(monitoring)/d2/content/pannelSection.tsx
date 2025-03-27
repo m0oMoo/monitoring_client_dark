@@ -4,6 +4,7 @@ import React, { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Chart } from "chart.js/auto";
 import zoomPlugin from "chartjs-plugin-zoom";
+import { v4 as uuidv4 } from "uuid";
 
 import { useChartOptions } from "@/context/chartOptionContext";
 import { useWidgetOptions } from "@/context/widgetOptionContext";
@@ -160,7 +161,7 @@ const PannelSection = () => {
       });
 
       newPannel = {
-        pannelId: panelId || "1",
+        pannelId: panelId || uuidv4(),
         pannelType: "chart",
         pannelOptions: chartOptions,
         datasets: chartOptions.datasets,
@@ -188,7 +189,7 @@ const PannelSection = () => {
       });
 
       newPannel = {
-        pannelId: panelId || "1",
+        pannelId: panelId || uuidv4(),
         pannelType: "widget",
         pannelOptions: widgetOptions,
         datasets: [],
