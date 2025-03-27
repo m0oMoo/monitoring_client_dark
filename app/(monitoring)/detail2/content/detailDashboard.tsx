@@ -9,8 +9,6 @@ import { v4 as uuidv4 } from "uuid";
 import Alert from "@/components/alert/alert";
 import TabMenu from "@/components/menu/tabMenu";
 import CustomTable from "@/components/table/customTable";
-import AddChartBar from "@/components/bar/addChartBar";
-import TimeRangeBar from "@/components/bar/timeRangeBar";
 import ChartPannel from "@/components/pannel/chart/chartPannel";
 import WidgetPannel from "@/components/pannel/widget/widgetPannel";
 
@@ -24,6 +22,8 @@ import {
 } from "@/data/chart/chartDetail";
 import { Dashboard, Dataset } from "@/types/dashboard";
 import { useDraftDashboardStore } from "@/store/useDraftDashboardStore";
+import DashboardLayout from "@/components/layout/dashboard/layout";
+import { useDashboardStateStore } from "@/store/useDashboardStateStore";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -41,15 +41,10 @@ const DetailDashboard = () => {
   } = useDashboardStore2();
 
   const { draftDashboard } = useDraftDashboardStore();
-
-  console.log("draftDashboard", draftDashboard);
+  const { title, description } = useDashboardStateStore();
 
   const [dashboardId, setDashboardId] = useState<string>(initialId || "1");
   const [dashboard, setDashboard] = useState<Dashboard>();
-  const [from, setFrom] = useState<string | null>(null);
-  const [to, setTo] = useState<string | null>(null);
-  const [refreshTime, setRefreshTime] = useState<number | "autoType">(10);
-  const [lastUpdated, setLastUpdated] = useState<string | null>(null);
   const [menuOpenIndex, setMenuOpenIndex] = useState<string | null>(null);
   const [isCloneModalOpen, setIsCloneModalOpen] = useState<boolean>(false);
   const [selectedDashboard, setSelectedDashboard] = useState<string | null>(
@@ -59,8 +54,6 @@ const DetailDashboard = () => {
   const [alertMessage, setAlertMessage] = useState<string>("");
   const [gridLayout, setGridLayout] = useState<Layout[]>([]);
   const [isEditing, setIsEditing] = useState<boolean>(false);
-  const [title, setTitle] = useState<string>("");
-  const [description, setDescription] = useState<string>("");
 
   const [panels, setPanels] = useState<any[]>([]);
 
@@ -70,7 +63,6 @@ const DetailDashboard = () => {
   useEffect(() => {
     // draftDashboard가 있을 때만 설정
     if (dashboardId === draftDashboard?.id) {
-      console.log("draftDashboard", draftDashboard);
       setDashboard(draftDashboard); // 기존 대시보드 로드
     } else {
       const fetchedDashboard = getDashboardById(dashboardId);
@@ -81,9 +73,6 @@ const DetailDashboard = () => {
       }
     }
   }, [dashboardId, draftDashboard]);
-
-  console.log(dashboardId);
-  console.log(dashboard);
 
   const handleLayoutChange = (layout: Layout[]) => {
     setGridLayout(layout);
@@ -129,10 +118,10 @@ const DetailDashboard = () => {
     };
 
     if (dashboardId !== draftDashboard?.id) {
-      setAlertMessage("기존 대시보드가 업데이트되었습니다.");
+      setAlertMessage("대시보드가 업데이트되었습니다.");
       updateDashboard(updatedDashboard); // 기존 대시보드 업데이트
     } else {
-      setAlertMessage("임시 대시보드가 저장되었습니다.");
+      setAlertMessage("대시보드가 저장되었습니다.");
       // draft 대시보드를 저장
       addDashboard(updatedDashboard);
       const newId = uuidv4();
@@ -163,19 +152,10 @@ const DetailDashboard = () => {
     setSelectedDashboard(null);
   };
 
-  useEffect(() => {
-    const now = new Date();
-    setFrom(now.toISOString().slice(0, 16));
-    setTo(now.toISOString().slice(0, 16));
-    setLastUpdated(now.toLocaleTimeString());
-  }, []);
-
   // dashboard가 변경될 때 패널 정보 업데이트
   useEffect(() => {
     if (dashboard) {
       setPanels(dashboard.pannels);
-      setTitle(dashboard.label);
-      setDescription(dashboard.description || "설명 없음");
 
       // 패널들의 레이아웃 정보 설정
       const newLayout = dashboard.pannels.map((panel) => ({
@@ -249,148 +229,133 @@ const DetailDashboard = () => {
 
   return (
     <div className="bg-modern-bg min-h-[calc(100vh-80px)]">
-      <AddChartBar
+      <DashboardLayout
         isEdit={!isEditing}
         onCreateClick={() => router.push(`/d2?id=${dashboardId}`)}
-        gridCols={2}
         onGridChange={() => {}}
-        gridVisible={true}
         modifiable={true}
         onEditClick={handleEditClick}
         onCancelClick={handleCancel}
-        onCallback={(title, desc) => {
-          setTitle(title);
-          setDescription(desc);
-        }}
-      />
-
-      <TimeRangeBar
-        from={from}
-        to={to}
-        lastUpdated={lastUpdated}
-        refreshTime={refreshTime}
-        onChange={(type, value) =>
-          type === "from" ? setFrom(value) : setTo(value)
-        }
-        onRefreshChange={setRefreshTime}
-      />
-
-      <ResponsiveGridLayout
-        className="layout"
-        layouts={layouts}
-        rowHeight={70}
-        isDraggable={isEditing}
-        isResizable={isEditing}
-        compactType={null}
-        preventCollision={true}
-        onLayoutChange={handleLayoutChange}
-        maxRows={20}
-        draggableHandle=".drag-handle"
-        resizeHandles={["se"]}
       >
-        {panels.map((panel) => {
-          const layout = gridLayout.find(
-            (item) => item.i === panel.pannelId
-          ) || {
-            i: panel.pannelId,
-            x: 0,
-            y: 0,
-            w: 4,
-            h: 4,
-            minW: MIN_CHART_WIDTH,
-            minH: MIN_CHART_HEIGHT,
-          };
+        <ResponsiveGridLayout
+          className="layout"
+          layouts={layouts}
+          rowHeight={70}
+          isDraggable={isEditing}
+          isResizable={isEditing}
+          compactType={null}
+          preventCollision={true}
+          onLayoutChange={handleLayoutChange}
+          maxRows={20}
+          draggableHandle=".drag-handle"
+          resizeHandles={["se"]}
+        >
+          {panels.map((panel) => {
+            const layout = gridLayout.find(
+              (item) => item.i === panel.pannelId
+            ) || {
+              i: panel.pannelId,
+              x: 0,
+              y: 0,
+              w: 4,
+              h: 4,
+              minW: MIN_CHART_WIDTH,
+              minH: MIN_CHART_HEIGHT,
+            };
 
-          return (
-            <div
-              key={panel.pannelId}
-              data-grid={layout}
-              //   className="drag-handle cursor-grab"
-            >
-              {isEditing && (
-                <div
-                  className="absolute top-2 right-2 z-10"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
-                  }}
-                >
-                  <MoreVertical
-                    className="text-text3 cursor-pointer hover:text-text2"
+            return (
+              <div
+                key={panel.pannelId}
+                data-grid={layout}
+                //   className="drag-handle cursor-grab"
+              >
+                {isEditing && (
+                  <div
+                    className="absolute top-2 right-2 z-10"
                     onClick={(e) => {
                       e.stopPropagation();
                       e.preventDefault();
-                      setMenuOpenIndex(
-                        menuOpenIndex === panel.pannelId ? null : panel.pannelId
-                      );
                     }}
-                  />
-                  {menuOpenIndex === panel.pannelId && (
-                    <div
+                  >
+                    <MoreVertical
+                      className="text-text3 cursor-pointer hover:text-text2"
                       onClick={(e) => {
                         e.stopPropagation();
                         e.preventDefault();
+                        setMenuOpenIndex(
+                          menuOpenIndex === panel.pannelId
+                            ? null
+                            : panel.pannelId
+                        );
                       }}
-                    >
-                      <TabMenu
-                        index={panel.pannelId}
-                        setEditingTabIndex={() =>
-                          handlePanelEdit(panel.pannelId)
-                        }
-                        setIsModalOpen={() => {}}
-                        setMenuOpenIndex={setMenuOpenIndex}
-                        handleTabDelete={() =>
-                          handlePanelDelete(panel.pannelId)
-                        }
-                        handleTabClone={handleTabClone}
-                      />
-                    </div>
-                  )}
-                </div>
-              )}
-              <div className="drag-handle cursor-grab bg-modern-bg p-2 h-full flex flex-col relative">
-                <h2 className="text-base font-normal mb-2 text-modern-text">
-                  {panel.pannelType === "widget"
-                    ? panel.pannelOptions.label
-                    : panel.pannelOptions.titleText}
-                </h2>
+                    />
+                    {menuOpenIndex === panel.pannelId && (
+                      <div
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                        }}
+                      >
+                        <TabMenu
+                          index={panel.pannelId}
+                          setEditingTabIndex={() =>
+                            handlePanelEdit(panel.pannelId)
+                          }
+                          setIsModalOpen={() => {}}
+                          setMenuOpenIndex={setMenuOpenIndex}
+                          handleTabDelete={() =>
+                            handlePanelDelete(panel.pannelId)
+                          }
+                          handleTabClone={handleTabClone}
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
+                <div className="drag-handle cursor-grab bg-modern-bg p-2 h-full flex flex-col relative">
+                  <h2 className="text-base font-normal mb-2 text-modern-text">
+                    {panel.pannelType === "widget"
+                      ? panel.pannelOptions.label
+                      : panel.pannelOptions.titleText}
+                  </h2>
 
-                <div className="flex-1 overflow-hidden">
-                  {panel.pannelType === "widget" ? (
-                    <WidgetPannel
-                      {...panel.pannelOptions}
-                      backgroundColor={
-                        panel.pannelOptions.widgetBackgroundColor
-                      }
-                      className="scale-[1] w-full h-full"
-                    />
-                  ) : panel.pannelOptions.displayMode === "chart" ? (
-                    <ChartPannel
-                      type={panel.pannelOptions.chartType}
-                      datasets={panel.datasets || []}
-                      options={panel.pannelOptions}
-                    />
-                  ) : (
-                    <CustomTable
-                      columns={[
-                        { key: "name", label: "ID" },
-                        ...(panel.datasets
-                          ? panel.datasets.map((dataset: Dataset) => ({
-                              key: dataset.label,
-                              label: dataset.label,
-                            }))
-                          : []), // datasets가 undefined일 경우 빈 배열 반환
-                      ]}
-                      data={convertToTable(panel.datasets || []).rows}
-                      title={panel.pannelOptions.titleText}
-                    />
-                  )}
+                  <div className="flex-1 overflow-hidden">
+                    {panel.pannelType === "widget" ? (
+                      <WidgetPannel
+                        {...panel.pannelOptions}
+                        backgroundColor={
+                          panel.pannelOptions.widgetBackgroundColor
+                        }
+                        className="scale-[1] w-full h-full"
+                      />
+                    ) : panel.pannelOptions.displayMode === "chart" ? (
+                      <ChartPannel
+                        type={panel.pannelOptions.chartType}
+                        datasets={panel.datasets || []}
+                        options={panel.pannelOptions}
+                      />
+                    ) : (
+                      <CustomTable
+                        columns={[
+                          { key: "name", label: "ID" },
+                          ...(panel.datasets
+                            ? panel.datasets.map((dataset: Dataset) => ({
+                                key: dataset.label,
+                                label: dataset.label,
+                              }))
+                            : []), // datasets가 undefined일 경우 빈 배열 반환
+                        ]}
+                        data={convertToTable(panel.datasets || []).rows}
+                        title={panel.pannelOptions.titleText}
+                      />
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
-      </ResponsiveGridLayout>
+            );
+          })}
+        </ResponsiveGridLayout>
+      </DashboardLayout>
 
       {isCloneModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-[100]">
@@ -436,7 +401,6 @@ const DetailDashboard = () => {
           </div>
         </div>
       )}
-
       {alertMessage && <Alert message={alertMessage} />}
     </div>
   );
