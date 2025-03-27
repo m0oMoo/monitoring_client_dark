@@ -1,7 +1,6 @@
 import { create } from "zustand";
 import { v4 as uuidv4 } from "uuid";
 import { Dashboard, DashboardPannel } from "@/types/dashboard";
-import { useDashboardStore2 } from "./useDashboard2Store";
 
 interface DraftDashboard {
   id: string;
@@ -15,6 +14,7 @@ interface DashboardStore {
   getDraftDashboardById: () => DraftDashboard | null; // draftDashboard 반환
   startDraftDashboard: (initialData: Partial<DraftDashboard>) => void;
   addPannelToDraft: (pannel: DashboardPannel, isEdit: boolean) => void;
+  updateDraftDashboard: (updatedDraftDashboard: DraftDashboard) => void;
   cancelDraftDashboard: () => void;
   deleteDraftDashboard: () => void;
 }
@@ -75,16 +75,19 @@ export const useDraftDashboardStore = create<DashboardStore>()((set, get) => ({
     });
   },
 
+  updateDraftDashboard: (updatedDraftDashboard: DraftDashboard) => {
+    if (!get().draftDashboard) {
+      console.warn("No draft dashboard to update");
+      return;
+    }
+    set({ draftDashboard: updatedDraftDashboard });
+  },
+
   cancelDraftDashboard: () => {
     set({ draftDashboard: null });
   },
 
-  // 임시 대시보드 삭제 함수 추가
   deleteDraftDashboard: () => {
     set({ draftDashboard: null });
-    console.log("임시 대시보드가 삭제되었습니다.");
   },
 }));
-
-// 임시 대시보드 삭제 함수 추가
-// 대시보드 저장 하지 않았을 경우 삭제
