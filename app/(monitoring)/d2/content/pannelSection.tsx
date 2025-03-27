@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { v4 as uuidv4 } from "uuid";
 import { Chart } from "chart.js/auto";
 import zoomPlugin from "chartjs-plugin-zoom";
 
@@ -17,8 +16,6 @@ import {
   DashboardPannel,
 } from "@/types/dashboard";
 
-import AddChartBar from "@/components/bar/addChartBar";
-import TimeRangeBar from "@/components/bar/timeRangeBar";
 import ChartPannel from "@/components/pannel/chart/chartPannel";
 import WidgetPannel from "@/components/pannel/widget/widgetPannel";
 import CustomTable from "@/components/table/customTable";
@@ -26,6 +23,7 @@ import CustomTable from "@/components/table/customTable";
 import { extractWidgetOptionData } from "@/types/extractWidgetOptionData";
 import { extractChartOptionData } from "@/types/extractChartOptionData";
 import { useDraftDashboardStore } from "@/store/useDraftDashboardStore";
+import DashboardLayout from "@/components/layout/dashboard/layout";
 
 Chart.register(zoomPlugin);
 
@@ -89,11 +87,6 @@ const PannelSection = () => {
   const { draftDashboard, addPannelToDraft } = useDraftDashboardStore();
   const dashboard = getDashboardById(dashboardId);
 
-  const [from, setFrom] = useState<string | null>(null);
-  const [to, setTo] = useState<string | null>(null);
-  const [refreshTime, setRefreshTime] = useState<number | "autoType">(10);
-  const [lastUpdated, setLastUpdated] = useState<string | null>(null);
-
   const existingPannel = pannelId
     ? dashboardId === draftDashboard?.id
       ? draftDashboard?.pannels.find((p) => p.pannelId === pannelId)
@@ -113,15 +106,6 @@ const PannelSection = () => {
       setWidgetOptions(existingPannel.pannelOptions as WidgetOptionData);
     }
   }, [existingPannel]);
-
-  // 시간 초기화
-  useEffect(() => {
-    const now = new Date();
-    const formatted = now.toISOString().slice(0, 16);
-    setFrom(formatted);
-    setTo(formatted);
-    setLastUpdated(now.toLocaleTimeString());
-  }, []);
 
   const handleCreateClick = () => {
     const isEditing = !!existingPannel;
@@ -232,100 +216,96 @@ const PannelSection = () => {
     }
   };
 
+  const handleCancel = () => {
+    router.back();
+  };
+
   return (
     <div className="mr-[300px] overflow-hidden">
-      <AddChartBar isEdit={true} onCreateClick={handleCreateClick} />
-
-      <TimeRangeBar
-        from={from}
-        to={to}
-        lastUpdated={lastUpdated}
-        refreshTime={refreshTime}
-        onChange={(type, value) =>
-          type === "from" ? setFrom(value) : setTo(value)
-        }
-        onRefreshChange={setRefreshTime}
-      />
-
-      <div className="px-4 min-h-[500px]">
-        {selectedSection === "widgetOption" ? (
-          <div className="flex justify-center items-center">
-            <WidgetPannel
-              widgetType={widgetType}
-              widgetData={widgetData}
-              label={label}
-              maxValue={maxValue}
-              thresholds={thresholds}
-              colors={colors}
-              subText={subText}
-              changePercent={changePercent}
-              backgroundColor={widgetBackgroundColor}
-              textColor={textColor}
-              unit={unit}
-              arrowVisible={arrowVisible}
-              className="scale-[2] origin-center mt-32 will-change-transform"
-            />
-          </div>
-        ) : displayMode === "chart" ? (
-          <div className="border border-modern-border rounded-lg p-6 shadow-md h-[450px] flex flex-col">
-            <h2 className="text-lg font-semibold mb-2 text-modern-text">
-              {titleText}
-            </h2>
-            <div className="flex-1">
-              <ChartPannel
-                type={chartType}
-                options={{
-                  chartType,
-                  titleText,
-                  showLegend,
-                  fill,
-                  legendPosition,
-                  legendColor,
-                  tooltipBgColor,
-                  isSingleColorMode,
-                  borderColor,
-                  backgroundColor,
-                  borderColors,
-                  backgroundColors,
-                  hoverMode,
-                  zoomMode,
-                  zoomSensitivity,
-                  xGridDisplay,
-                  yGridDisplay,
-                  crosshairColor,
-                  showCrosshair,
-                  crosshairWidth,
-                  enableZoom,
-                  radius,
-                  tension,
-                  tooltipMode,
-                  crosshairOpacity,
-                  displayMode,
-                }}
-                datasets={datasets}
+      <DashboardLayout
+        onCreateClick={handleCreateClick}
+        onCancelClick={handleCancel}
+      >
+        <div className="px-4 min-h-[500px]">
+          {selectedSection === "widgetOption" ? (
+            <div className="flex justify-center items-center">
+              <WidgetPannel
+                widgetType={widgetType}
+                widgetData={widgetData}
+                label={label}
+                maxValue={maxValue}
+                thresholds={thresholds}
+                colors={colors}
+                subText={subText}
+                changePercent={changePercent}
+                backgroundColor={widgetBackgroundColor}
+                textColor={textColor}
+                unit={unit}
+                arrowVisible={arrowVisible}
+                className="scale-[2] origin-center mt-32 will-change-transform"
               />
             </div>
-          </div>
-        ) : (
-          <CustomTable
-            columns={[
-              { key: "name", label: "ID" },
-              ...datasets.map((dataset) => ({
-                key: dataset.label,
-                label: dataset.label,
-              })),
-            ]}
-            data={datasets[0]?.data.map((_, index) => ({
-              name: `${index + 1}`,
-              ...datasets.reduce((acc, dataset) => {
-                acc[dataset.label] = dataset.data[index];
-                return acc;
-              }, {} as Record<string, any>),
-            }))}
-            title={titleText}
-          />
-        )}
-      </div>
+          ) : displayMode === "chart" ? (
+            <div className="border border-modern-border rounded-lg p-6 shadow-md h-[450px] flex flex-col">
+              <h2 className="text-lg font-semibold mb-2 text-modern-text">
+                {titleText}
+              </h2>
+              <div className="flex-1">
+                <ChartPannel
+                  type={chartType}
+                  options={{
+                    chartType,
+                    titleText,
+                    showLegend,
+                    fill,
+                    legendPosition,
+                    legendColor,
+                    tooltipBgColor,
+                    isSingleColorMode,
+                    borderColor,
+                    backgroundColor,
+                    borderColors,
+                    backgroundColors,
+                    hoverMode,
+                    zoomMode,
+                    zoomSensitivity,
+                    xGridDisplay,
+                    yGridDisplay,
+                    crosshairColor,
+                    showCrosshair,
+                    crosshairWidth,
+                    enableZoom,
+                    radius,
+                    tension,
+                    tooltipMode,
+                    crosshairOpacity,
+                    displayMode,
+                  }}
+                  datasets={datasets}
+                />
+              </div>
+            </div>
+          ) : (
+            <CustomTable
+              columns={[
+                { key: "name", label: "ID" },
+                ...datasets.map((dataset) => ({
+                  key: dataset.label,
+                  label: dataset.label,
+                })),
+              ]}
+              data={datasets[0]?.data.map((_, index) => ({
+                name: `${index + 1}`,
+                ...datasets.reduce((acc, dataset) => {
+                  acc[dataset.label] = dataset.data[index];
+                  return acc;
+                }, {} as Record<string, any>),
+              }))}
+              title={titleText}
+            />
+          )}
+        </div>
+      </DashboardLayout>
     </div>
   );
 };
