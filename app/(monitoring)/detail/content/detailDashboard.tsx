@@ -226,9 +226,7 @@ const DetailDashboard = () => {
       <AddChartBar
         isEdit={isEditing}
         onCreateClick={() => router.push(`/d?id=${dashboardId}`)}
-        gridCols={2}
         onGridChange={() => {}}
-        gridVisible={true}
         modifiable={true}
         onEditClick={handleEditClick}
       />
