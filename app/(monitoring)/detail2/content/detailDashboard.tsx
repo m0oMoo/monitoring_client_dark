@@ -143,7 +143,7 @@ const DetailDashboard = () => {
   };
 
   const confirmClone = () => {
-    if (selectedItem && selectedDashboard && dashboardId) {
+    if (selectedItem && selectedDashboard) {
       clonePannelToDashboard(dashboardId, selectedItem, selectedDashboard);
       setAlertMessage("복제 완료!");
     }
