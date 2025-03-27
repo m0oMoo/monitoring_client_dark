@@ -41,51 +41,51 @@ const AddChartBar = ({
 
   // 대시보드 및 패널 로딩
   useEffect(() => {
-    // draftDashboard가 있을 때만 설정
-    if (dashboardId === draftDashboard?.id) {
-      // title과 description이 실제로 변경된 경우에만 상태를 업데이트
-      if (
-        draftDashboard.label !== title ||
-        draftDashboard.description !== description
-      ) {
-        const updatedDraftDashboard = {
-          ...draftDashboard, // 기존 draftDashboard 정보
-          label: title, // 새로운 title 값
-          description: description, // 새로운 description 값
-        };
-        useDraftDashboardStore
-          .getState()
-          .updateDraftDashboard(updatedDraftDashboard); // 임시 대시보드 업데이트
-      }
-    } else {
-      const fetchedDashboard = getDashboardById(dashboardId);
-      if (fetchedDashboard) {
-        // title과 description이 실제로 변경된 경우에만 상태를 업데이트
-        if (
-          fetchedDashboard.label !== title ||
-          fetchedDashboard.description !== description
-        ) {
-          const updatedDashboard = {
-            ...fetchedDashboard, // 기존 대시보드 정보
-            label: title, // 새로운 title 값
-            description: description, // 새로운 description 값
-          };
-          useDashboardStore2.getState().updateDashboard(updatedDashboard); // 기존 대시보드 업데이트
-        }
-      } else {
-        console.log("대시보드가 없습니다."); // 대시보드가 없을 경우 로깅
-      }
-    }
-  }, [dashboardId, draftDashboard, title, description, getDashboardById]);
+    // 대시보드 ID를 기준으로 대시보드 선택
+    const currentDashboard =
+      dashboardId === draftDashboard?.id
+        ? draftDashboard
+        : getDashboardById(dashboardId);
 
-  const handleGoBack = () => {
-    router.push("/dashboard");
-  };
+    if (currentDashboard) {
+      // 첫 로딩 시 title과 description 세팅
+      setTitle(currentDashboard.label);
+      setDescription(currentDashboard.description || "");
+    } else {
+      console.log("대시보드가 없습니다.");
+    }
+  }, [dashboardId, draftDashboard, getDashboardById, setTitle, setDescription]);
 
   const handleSaveTitleDesc = () => {
-    // 상태 업데이트: title과 description 변경 시 바로바로 Zustand로 저장
-    setTitle(title);
-    setDescription(description);
+    const updateStore = draftDashboard
+      ? useDraftDashboardStore.getState().updateDraftDashboard
+      : useDashboardStore2.getState().updateDashboard;
+
+    const currentDashboard = draftDashboard || getDashboardById(dashboardId);
+
+    if (currentDashboard) {
+      updateStore({
+        ...currentDashboard,
+        label: title,
+        description: description,
+      });
+    }
+
+    setIsEditingTitle(false);
+    setIsEditingDesc(false);
+  };
+
+  // title, description 수정 시 저장
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setTitle(e.target.value); // 실시간으로 Zustand 상태 업데이트
+  };
+
+  const handleDescChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setDescription(e.target.value); // 실시간으로 Zustand 상태 업데이트
+  };
+
+  const handleGoBack = () => {
+    router.push("/dashboard2");
   };
 
   return (
@@ -106,9 +106,7 @@ const AddChartBar = ({
                 <input
                   value={title}
                   autoFocus
-                  onChange={(e) => {
-                    setTitle(e.target.value); // 실시간으로 Zustand 상태 업데이트
-                  }}
+                  onChange={handleTitleChange}
                   onBlur={() => {
                     setIsEditingTitle(false);
                     handleSaveTitleDesc(); // 실시간 저장
@@ -142,9 +140,7 @@ const AddChartBar = ({
               <input
                 value={description}
                 autoFocus
-                onChange={(e) => {
-                  setDescription(e.target.value); // 실시간으로 Zustand 상태 업데이트
-                }}
+                onChange={handleDescChange}
                 onBlur={() => {
                   setIsEditingDesc(false);
                   handleSaveTitleDesc(); // 실시간 저장
