@@ -41,6 +41,8 @@ const SnapshotDetailSection = () => {
     <div className="bg-modern-bg min-h-[calc(100vh-80px)]">
       <div className="bg-transparent h-[42.8px]" />
       <SnapshotTimeRangeBar
+        title={snapshot.name}
+        description={snapshot.description}
         from={snapshot.data.from || null}
         to={snapshot.data.to || null}
         lastUpdated={snapshot.createdAt}
