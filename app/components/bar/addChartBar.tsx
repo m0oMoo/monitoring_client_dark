@@ -87,7 +87,7 @@ const AddChartBar = ({
   };
 
   return (
-    <div className="flex justify-between items-center mt-[44px] bg-modern-bg border-b border-modern-border border-0.5 py-1.5 px-4">
+    <div className="flex justify-between items-center mt-5 bg-modern-bg border-b border-modern-border border-0.5 py-1.5 px-4">
       {/* breadcrumb + 이름/설명 인라인 수정 */}
       <div>
         <div className="text-lg1 text-modern-text_disable">
