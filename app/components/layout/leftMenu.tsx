@@ -4,7 +4,8 @@ import { LayoutGrid, FileText, Database } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 
 const MENU = [
-  { id: 1, title: "Dashboard", icon: LayoutGrid, link: "/dashboard" },
+  // { id: 1, title: "Dashboard", icon: LayoutGrid, link: "/dashboard" },
+  { id: 5, title: "Dashboard", icon: LayoutGrid, link: "/dashboard2" },
   { id: 2, title: "Reports", icon: FileText, link: "/reports" },
   {
     id: 3,
@@ -18,7 +19,6 @@ const MENU = [
   //   icon: LayoutGrid,
   //   link: "/d",
   // },
-  { id: 5, title: "Dashboard2", icon: LayoutGrid, link: "/dashboard2" },
 ];
 
 const LeftMenu = () => {
@@ -49,7 +49,7 @@ const LeftMenu = () => {
             key={item.id}
             className={`flex items-center space-x-2 cursor-pointer pl-4 
               ${
-                item.id === 1
+                item.id === 5
                   ? isDashboardActive
                     ? "text-modern-primary border-l-2 border-modern-border text-bold_lg"
                     : "text-lg1 text-modern-text_disable"
