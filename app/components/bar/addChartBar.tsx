@@ -3,6 +3,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useDashboardStateStore } from "@/store/useDashboardStateStore";
 import { useDashboardStore2 } from "@/store/useDashboard2Store";
 import { useDraftDashboardStore } from "@/store/useDraftDashboardStore";
+import { Eye, EyeOff } from "lucide-react";
 
 interface AddChartBarProps {
   isEdit: boolean;
@@ -36,6 +37,8 @@ const AddChartBar = ({
 
   const [isEditingTitle, setIsEditingTitle] = useState<boolean>(false);
   const [isEditingDesc, setIsEditingDesc] = useState<boolean>(false);
+  const [isDescriptionVisible, setIsDescriptionVisible] =
+    useState<boolean>(true);
 
   // 대시보드 및 패널 로딩
   useEffect(() => {
@@ -87,115 +90,142 @@ const AddChartBar = ({
   };
 
   return (
-    <div className="flex justify-between items-center mt-5 bg-modern-bg border-b border-modern-border border-0.5 py-1.5 px-4">
-      {/* breadcrumb + 이름/설명 인라인 수정 */}
-      <div>
-        <div className="text-lg1 text-modern-text_disable">
-          <span
-            className="text-text1 cursor-pointer hover:underline"
-            onClick={handleGoBack}
-          >
-            Dashboard
-          </span>
-          &nbsp; {">"} &nbsp;
-          {isEditingTitleValue ? (
-            <>
-              {isEditingTitle ? (
+    <>
+      <div className="flex justify-between items-center mt-5 bg-modern-bg border-b border-modern-border border-0.5 py-1.5 px-3">
+        {/* breadcrumb + 이름/설명 인라인 수정 */}
+        <div>
+          <div className="flex text-lg1 text-modern-text_disable">
+            <span
+              className="text-text1 cursor-pointer hover:underline"
+              onClick={handleGoBack}
+            >
+              Dashboard
+            </span>
+            &nbsp; {">"} &nbsp;
+            {isEditingTitleValue ? (
+              <>
+                {isEditingTitle ? (
+                  <input
+                    value={title}
+                    autoFocus
+                    onChange={handleTitleChange}
+                    onBlur={() => {
+                      setIsEditingTitle(false);
+                      handleSaveTitleDesc(); // 실시간 저장
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        setIsEditingTitle(false);
+                        handleSaveTitleDesc(); // 실시간 저장
+                      }
+                    }}
+                    className="border bg-transparent px-2 py-0.5 rounded ml-1 text-modern-text w-64"
+                  />
+                ) : (
+                  <div className="flex gap-3 items-center justify-center">
+                    <span
+                      onClick={() => setIsEditingTitle(true)}
+                      className="text-modern-text ml-1 cursor-pointer hover:underline"
+                    >
+                      {title || "제목 없음"}
+                    </span>
+                    <button
+                      className="px-2 py-0.5 rounded text-modern-subtext"
+                      onClick={() => setIsDescriptionVisible((prev) => !prev)}
+                    >
+                      {isDescriptionVisible ? (
+                        <Eye size={16} />
+                      ) : (
+                        <EyeOff size={16} />
+                      )}
+                    </button>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="flex gap-3 items-center justify-center">
+                <span className="text-modern-text ml-1">
+                  {title || "제목 없음"}
+                </span>
+                <button
+                  className="hover:bg-modern-border border px-2 py-0.5 rounded text-modern-subtext"
+                  onClick={() => setIsDescriptionVisible((prev) => !prev)}
+                >
+                  {isDescriptionVisible ? (
+                    <Eye size={16} />
+                  ) : (
+                    <EyeOff size={16} />
+                  )}
+                </button>
+              </div>
+            )}
+          </div>
+          {isDescriptionVisible &&
+            (isEditingDescValue ? (
+              isEditingDesc ? (
                 <input
-                  value={title}
+                  value={description}
                   autoFocus
-                  onChange={handleTitleChange}
+                  onChange={handleDescChange}
                   onBlur={() => {
-                    setIsEditingTitle(false);
+                    setIsEditingDesc(false);
                     handleSaveTitleDesc(); // 실시간 저장
                   }}
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
-                      setIsEditingTitle(false);
+                      setIsEditingDesc(false);
                       handleSaveTitleDesc(); // 실시간 저장
                     }
                   }}
-                  className="border bg-transparent px-2 py-0.5 rounded ml-1 text-modern-text w-64"
+                  className="text-sm mt-1 text-modern-subtext bg-transparent border px-2 py-0.5 rounded"
+                  placeholder="설명 입력"
                 />
               ) : (
-                <span
-                  onClick={() => setIsEditingTitle(true)}
-                  className="text-modern-text ml-1 cursor-pointer hover:underline"
+                <p
+                  onClick={() => setIsEditingDesc(true)}
+                  className="text-sm mt-1 text-modern-subtext cursor-pointer hover:underline"
                 >
-                  {title || "제목 없음"}
-                </span>
-              )}
-            </>
-          ) : (
-            <span className="text-modern-text ml-1">
-              {title || "제목 없음"}
-            </span>
-          )}
-        </div>
-        {isEditingDescValue ? (
-          <>
-            {isEditingDesc ? (
-              <input
-                value={description}
-                autoFocus
-                onChange={handleDescChange}
-                onBlur={() => {
-                  setIsEditingDesc(false);
-                  handleSaveTitleDesc(); // 실시간 저장
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    setIsEditingDesc(false);
-                    handleSaveTitleDesc(); // 실시간 저장
-                  }
-                }}
-                className="text-sm mt-1 text-modern-subtext bg-transparent border px-2 py-0.5 rounded"
-                placeholder="설명 입력"
-              />
+                  {description || "설명 없음"}
+                </p>
+              )
             ) : (
-              <p
-                onClick={() => setIsEditingDesc(true)}
-                className="text-sm mt-1 text-modern-subtext cursor-pointer hover:underline"
-              >
+              <p className="text-sm mt-1 text-modern-subtext">
                 {description || "설명 없음"}
               </p>
-            )}
-          </>
-        ) : (
-          <p className="text-sm mt-1 text-modern-subtext">
-            {description || "설명 없음"}
-          </p>
-        )}
-      </div>
+            ))}
+        </div>
 
-      {/* 버튼들 */}
-      <div className="flex flex-row gap-5">
-        <div className="flex flex-row gap-2 text-sm1">
-          {!isEdit && (
-            <button
-              className="hover:bg-modern-point_20 bg-modern-point_10 px-2 py-0.5 text-modern-point border-modern-point"
-              onClick={onCancelClick}
-            >
-              cancel
-            </button>
-          )}
-          {modifiable && (
-            <button
-              className="hover:bg-modern-point_20 bg-modern-point_10 px-2 py-0.5 text-modern-point border-modern-point"
-              onClick={onEditClick}
-            >
-              {isEdit ? "Edit" : "Save"}
-            </button>
-          )}
-          <button
-            className="border hover:bg-modern-point_20 bg-modern-point_10 px-2 py-1 text-modern-point border-modern-point"
-            onClick={onCreateClick}
-          >
-            Create
-          </button>
+        {/* 버튼들 */}
+        <div className="flex flex-row gap-5">
+          <div className="flex flex-row gap-2 text-sm1">
+            {!isEdit && (
+              <button
+                className="hover:bg-modern-point_20 bg-modern-point_10 px-2 py-0.5 text-modern-point border-modern-point"
+                onClick={onCancelClick}
+              >
+                cancel
+              </button>
+            )}
+            {modifiable && (
+              <button
+                className="border hover:bg-modern-point_20 bg-modern-point_10 px-2 py-1 text-modern-point border-modern-point"
+                onClick={onEditClick}
+              >
+                {isEdit ? "Edit" : "Save"}
+              </button>
+            )}
+            {!isEdit && (
+              <button
+                className="border hover:bg-modern-point_20 bg-modern-point_10 px-2 py-1 text-modern-point border-modern-point"
+                onClick={onCreateClick}
+              >
+                Create
+              </button>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
