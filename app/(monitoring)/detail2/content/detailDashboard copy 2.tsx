@@ -1,0 +1,388 @@
+// ✅ 전체 코드 수정본
+"use client";
+
+import React, { useState, useEffect, useMemo } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Layout, Responsive, WidthProvider } from "react-grid-layout";
+import { MoreVertical } from "lucide-react";
+import { v4 as uuidv4 } from "uuid";
+
+import Alert from "@/components/alert/alert";
+import TabMenu from "@/components/menu/tabMenu";
+import CustomTable from "@/components/table/customTable";
+import ChartPannel from "@/components/pannel/chart/chartPannel";
+import WidgetPannel from "@/components/pannel/widget/widgetPannel";
+
+import { useDashboardStore2 } from "@/store/useDashboard2Store";
+import { convertToTable } from "@/utils/convertToTable";
+import {
+  MIN_CHART_HEIGHT,
+  MIN_CHART_WIDTH,
+  MIN_WIDGET_HEIGHT,
+  MIN_WIDGET_WIDTH,
+} from "@/data/chart/chartDetail";
+import { Dashboard, Dataset } from "@/types/dashboard";
+import { useDraftDashboardStore } from "@/store/useDraftDashboardStore";
+import DashboardLayout from "@/components/layout/dashboard/layout";
+import { useDashboardStateStore } from "@/store/useDashboardStateStore";
+import { useTempPanelStore } from "@/store/useTempPanelStore";
+
+const ResponsiveGridLayout = WidthProvider(Responsive);
+
+const DetailDashboard = () => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const initialId = searchParams.get("id");
+
+  const {
+    getDashboardById,
+    clonePannelToDashboard,
+    dashboardList,
+    addDashboard,
+    updateDashboard,
+  } = useDashboardStore2();
+
+  const { draftDashboard } = useDraftDashboardStore();
+  const { title, description } = useDashboardStateStore();
+  const {
+    tempPanel,
+    setTempPanel,
+    tempPanelTargetDashboardId,
+    clearTempPanel,
+  } = useTempPanelStore();
+
+  const [dashboardId, setDashboardId] = useState<string>(initialId || "1");
+  const [dashboard, setDashboard] = useState<Dashboard>();
+  const [menuOpenIndex, setMenuOpenIndex] = useState<string | null>(null);
+  const [isCloneModalOpen, setIsCloneModalOpen] = useState<boolean>(false);
+  const [selectedDashboard, setSelectedDashboard] = useState<string | null>(
+    null
+  );
+  const [selectedItem, setSelectedItem] = useState<string | null>(null);
+  const [alertMessage, setAlertMessage] = useState<string>("");
+  const [gridLayout, setGridLayout] = useState<Layout[]>([]);
+  const [isEditing, setIsEditing] = useState<boolean>(false);
+
+  const displayedPanels = useMemo(() => {
+    const base = dashboard?.pannels ?? [];
+    if (tempPanel && tempPanelTargetDashboardId === dashboardId) {
+      const isEdit = base.some((p) => p.pannelId === tempPanel.pannelId);
+      return isEdit
+        ? base.map((p) => (p.pannelId === tempPanel.pannelId ? tempPanel : p))
+        : [...base, tempPanel];
+    }
+    return base;
+  }, [dashboard, tempPanel, tempPanelTargetDashboardId, dashboardId]);
+
+  const layouts = useMemo(() => ({ lg: gridLayout }), [gridLayout]);
+
+  useEffect(() => {
+    if (dashboard) {
+      const newLayout = displayedPanels.map((panel) => ({
+        i: panel.pannelId,
+        x: panel.gridPos.x,
+        y: panel.gridPos.y,
+        w: panel.gridPos.w,
+        h: panel.gridPos.h,
+        minW:
+          panel.pannelType === "widget" ? MIN_WIDGET_WIDTH : MIN_CHART_WIDTH,
+        minH:
+          panel.pannelType === "widget" ? MIN_WIDGET_HEIGHT : MIN_CHART_HEIGHT,
+      }));
+      setGridLayout(newLayout);
+    }
+  }, [displayedPanels, dashboard]);
+
+  useEffect(() => {
+    if (dashboardId === draftDashboard?.id) {
+      setDashboard(draftDashboard);
+    } else {
+      const fetched = getDashboardById(dashboardId);
+      if (fetched) setDashboard(fetched);
+    }
+  }, [dashboardId, draftDashboard]);
+
+  const handleLayoutChange = (layout: Layout[]) => {
+    setGridLayout(layout);
+
+    layout.forEach((item) => {
+      if (
+        tempPanel &&
+        tempPanelTargetDashboardId === dashboardId &&
+        item.i === tempPanel.pannelId
+      ) {
+        setTempPanel(
+          {
+            ...tempPanel,
+            gridPos: { x: item.x, y: item.y, w: item.w, h: item.h },
+          },
+          dashboardId
+        );
+      }
+    });
+  };
+
+  const handleSaveDashboard = () => {
+    if (displayedPanels.length === 0) {
+      setAlertMessage(
+        "패널을 하나 이상 추가해야 대시보드를 저장할 수 있습니다."
+      );
+      return;
+    }
+
+    let finalPanels = dashboard?.pannels ?? [];
+    if (tempPanel && tempPanelTargetDashboardId === dashboardId) {
+      const isEdit = finalPanels.some((p) => p.pannelId === tempPanel.pannelId);
+      finalPanels = isEdit
+        ? finalPanels.map((p) =>
+            p.pannelId === tempPanel.pannelId ? tempPanel : p
+          )
+        : [...finalPanels, tempPanel];
+    }
+
+    const updated: Dashboard = {
+      ...dashboard!,
+      label: title,
+      description,
+      pannels: finalPanels,
+    };
+
+    updateDashboard(updated);
+    setDashboard(updated);
+    clearTempPanel();
+    setAlertMessage("대시보드가 저장되었습니다.");
+  };
+
+  const handleCancel = () => {
+    clearTempPanel();
+    setIsEditing(false);
+  };
+
+  const confirmClone = () => {
+    if (selectedItem && selectedDashboard) {
+      clonePannelToDashboard(dashboardId, selectedItem, selectedDashboard);
+      setAlertMessage("복제 완료!");
+    }
+    setIsCloneModalOpen(false);
+    setSelectedItem(null);
+    setSelectedDashboard(null);
+  };
+
+  // 패널 수정으로 이동하는 함수
+  const handlePanelEdit = (pannelId: string) => {
+    if (isEditing) {
+      router.push(`/d2?id=${dashboardId}&pannelId=${pannelId}`);
+    } else {
+      setAlertMessage("편집 모드에서만 패널을 수정할 수 있습니다.");
+    }
+  };
+
+  // 패널 삭제 함수
+  const handlePanelDelete = (pannelId: string) => {
+    if (!isEditing) {
+      setAlertMessage("편집 모드에서만 패널을 삭제할 수 있습니다.");
+      return;
+    }
+
+    // tempPanel 삭제
+    if (tempPanel && tempPanel.pannelId === pannelId) {
+      clearTempPanel();
+      setAlertMessage("임시 패널이 삭제되었습니다.");
+      return;
+    }
+
+    // 기존 패널만 삭제
+    const updated =
+      dashboard?.pannels.filter((p) => p.pannelId !== pannelId) ?? [];
+    if (dashboard) {
+      updateDashboard({ ...dashboard, pannels: updated });
+      setDashboard({ ...dashboard, pannels: updated });
+      setAlertMessage("패널이 삭제되었습니다. 저장하려면 Save를 누르세요.");
+    }
+  };
+
+  // 패널 복제 함수
+  const handleTabClone = (itemId: string) => {
+    setSelectedItem(itemId);
+    setIsCloneModalOpen(true);
+  };
+
+  return (
+    <div className="bg-modern-bg min-h-[calc(100vh-80px)]">
+      <DashboardLayout
+        isEdit={!isEditing}
+        onCreateClick={() => router.push(`/d2?id=${dashboardId}`)}
+        onGridChange={() => {}}
+        modifiable={true}
+        onEditClick={() => {
+          if (isEditing) handleSaveDashboard();
+          setIsEditing((prev) => !prev);
+        }}
+        onCancelClick={handleCancel}
+      >
+        <ResponsiveGridLayout
+          className="layout"
+          layouts={layouts}
+          rowHeight={70}
+          isDraggable={isEditing}
+          isResizable={isEditing}
+          compactType={null}
+          preventCollision={true}
+          onLayoutChange={handleLayoutChange}
+          maxRows={20}
+          draggableHandle=".drag-handle"
+          resizeHandles={["se"]}
+        >
+          {displayedPanels.map((panel) => {
+            const layout = gridLayout.find(
+              (item) => item.i === panel.pannelId
+            ) || {
+              i: panel.pannelId,
+              x: 0,
+              y: 0,
+              w: 4,
+              h: 4,
+              minW: MIN_CHART_WIDTH,
+              minH: MIN_CHART_HEIGHT,
+            };
+
+            return (
+              <div key={panel.pannelId} data-grid={layout}>
+                {isEditing && (
+                  <div
+                    className="absolute top-2 right-2 z-10"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                    }}
+                  >
+                    <MoreVertical
+                      className="text-text3 cursor-pointer hover:text-text2"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        setMenuOpenIndex(
+                          menuOpenIndex === panel.pannelId
+                            ? null
+                            : panel.pannelId
+                        );
+                      }}
+                    />
+                    {menuOpenIndex === panel.pannelId && (
+                      <div
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                        }}
+                      >
+                        <TabMenu
+                          index={panel.pannelId}
+                          setEditingTabIndex={() =>
+                            handlePanelEdit(panel.pannelId)
+                          }
+                          setIsModalOpen={() => {}}
+                          setMenuOpenIndex={setMenuOpenIndex}
+                          handleTabDelete={() =>
+                            handlePanelDelete(panel.pannelId)
+                          }
+                          handleTabClone={handleTabClone}
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
+                <div className="drag-handle cursor-grab bg-modern-bg p-2 h-full flex flex-col relative">
+                  <h2 className="text-base font-normal mb-2 text-modern-text">
+                    {panel.pannelType === "widget"
+                      ? panel.pannelOptions.label
+                      : panel.pannelOptions.titleText}
+                  </h2>
+
+                  <div className="flex-1 overflow-hidden">
+                    {panel.pannelType === "widget" ? (
+                      <WidgetPannel
+                        {...panel.pannelOptions}
+                        backgroundColor={
+                          panel.pannelOptions.widgetBackgroundColor
+                        }
+                        className="scale-[1] w-full h-full"
+                      />
+                    ) : panel.pannelOptions.displayMode === "chart" ? (
+                      <ChartPannel
+                        type={panel.pannelOptions.chartType}
+                        datasets={panel.datasets || []}
+                        options={panel.pannelOptions}
+                      />
+                    ) : (
+                      <CustomTable
+                        columns={[
+                          { key: "name", label: "ID" },
+                          ...(panel.datasets
+                            ? panel.datasets.map((dataset: Dataset) => ({
+                                key: dataset.label,
+                                label: dataset.label,
+                              }))
+                            : []), // datasets가 undefined일 경우 빈 배열 반환
+                        ]}
+                        data={convertToTable(panel.datasets || []).rows}
+                        title={panel.pannelOptions.titleText}
+                      />
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </ResponsiveGridLayout>
+      </DashboardLayout>
+
+      {isCloneModalOpen && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-[100]">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+            <h2 className="text-lg font-bold mb-4">대시보드 선택</h2>
+            <ul>
+              {dashboardList.map((dashboard) => (
+                <li
+                  key={dashboard.id}
+                  onClick={() => setSelectedDashboard(dashboard.id)}
+                  className={`cursor-pointer p-2 rounded ${
+                    selectedDashboard === dashboard.id
+                      ? "bg-modern-btn text-white"
+                      : "hover:bg-gray-100"
+                  }`}
+                >
+                  {dashboard.label}
+                </li>
+              ))}
+            </ul>
+            <div className="flex justify-end mt-4">
+              <button
+                onClick={() => {
+                  setIsCloneModalOpen(false);
+                  setSelectedDashboard(null);
+                }}
+                className="mr-2 px-4 py-2 bg-gray-200 rounded text-md2"
+              >
+                취소
+              </button>
+              <button
+                onClick={confirmClone}
+                disabled={!selectedDashboard}
+                className={`px-4 py-2 rounded text-md2 text-white ${
+                  selectedDashboard
+                    ? "bg-modern-btn"
+                    : "bg-modern-btn opacity-80"
+                }`}
+              >
+                확인
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {alertMessage && <Alert message={alertMessage} />}
+    </div>
+  );
+};
+
+export default DetailDashboard;
