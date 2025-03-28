@@ -10,7 +10,6 @@ interface AddChartBarProps {
   onEditClick?: () => void;
   onSaveClick?: () => void;
   onCancelClick?: () => void;
-  onGridChange?: (change: number) => void;
   modifiable?: boolean;
   isEditingTitleValue?: boolean;
   isEditingDescValue?: boolean;
@@ -22,7 +21,6 @@ const AddChartBar = ({
   onEditClick,
   onSaveClick,
   onCancelClick,
-  onGridChange,
   modifiable = false,
   isEditingTitleValue = true,
   isEditingDescValue = true,
@@ -99,7 +97,7 @@ const AddChartBar = ({
           >
             Dashboard
           </span>
-          &nbsp; {">"}
+          &nbsp; {">"} &nbsp;
           {isEditingTitleValue ? (
             <>
               {isEditingTitle ? (
