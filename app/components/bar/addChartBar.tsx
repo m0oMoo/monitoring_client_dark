@@ -198,7 +198,7 @@ const AddChartBar = ({
         {/* 버튼들 */}
         <div className="flex flex-row gap-5">
           <div className="flex flex-row gap-2 text-sm1">
-            {!isEdit && (
+            {isEdit && (
               <button
                 className="hover:bg-modern-point_20 bg-modern-point_10 px-2 py-0.5 text-modern-point border-modern-point"
                 onClick={onCancelClick}
@@ -211,10 +211,10 @@ const AddChartBar = ({
                 className="border hover:bg-modern-point_20 bg-modern-point_10 px-2 py-1 text-modern-point border-modern-point"
                 onClick={onEditClick}
               >
-                {isEdit ? "Edit" : "Save"}
+                {isEdit ? "Save" : "Edit"}
               </button>
             )}
-            {!isEdit && (
+            {isEdit && (
               <button
                 className="border hover:bg-modern-point_20 bg-modern-point_10 px-2 py-1 text-modern-point border-modern-point"
                 onClick={onCreateClick}
