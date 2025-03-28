@@ -234,7 +234,7 @@ const PannelSection = () => {
   };
 
   return (
-    <div className="mr-[300px] overflow-hidden">
+    <div className="mr-[300px] overflow-hidden pt-6">
       <DashboardLayout
         onCreateClick={handleCreateClick}
         onCancelClick={handleCancel}
