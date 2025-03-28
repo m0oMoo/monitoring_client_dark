@@ -14,8 +14,6 @@ const SnapshotMainSection = () => {
     const snapshot = snapshots.find((s) => s.snapshotId === snapshotId);
     if (!snapshot) return;
     router.push(`/snapshot/detail?id=${snapshotId}`);
-    // TODO: 스냅샷 데이터를 적용하는 로직 필요 (예: 임시 대시보드 상태 세팅 후 이동)
-    // alert(`스냅샷 적용 예정: ${snapshot.name}`);
   };
 
   return (
@@ -32,7 +30,7 @@ const SnapshotMainSection = () => {
           {snapshots.map((snap) => (
             <li
               key={snap.snapshotId}
-              className="p-4 rounded-md border border-modern-border bg-modern-white_0 flex justify-between items-center"
+              className="p-4 py-6 rounded-md border border-modern-border bg-modern-white_0 flex justify-between items-center"
             >
               <div>
                 <h3 className="font-semibold text-lg">{snap.name}</h3>
@@ -40,7 +38,7 @@ const SnapshotMainSection = () => {
                   {snap.description}
                 </p>
                 <p className="text-xs text-modern-subtext">
-                  저장일시:
+                  저장일시: &nbsp;
                   {format(new Date(snap.createdAt), "yyyy-MM-dd HH:mm:ss")}
                 </p>
               </div>
