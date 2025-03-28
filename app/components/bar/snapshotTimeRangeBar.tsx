@@ -33,7 +33,7 @@ const SnapshotTimeRangeBar: React.FC<TimeRangeBarProps> = ({
       <div
         className={`flex items-center justify-between bg-modern-bg border-b border-modern-border border-0.5 ${className}`}
       >
-        <div className="flex justify-between gap-4 pl-4 p-3">
+        <div className="flex justify-between gap-4 pl-4 py-1.5 px-3">
           <span
             className="text-lg1 text-modern-text_disable cursor-pointer hover:underline"
             onClick={handleGoBack}
