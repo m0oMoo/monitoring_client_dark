@@ -25,6 +25,7 @@ import { extractWidgetOptionData } from "@/types/extractWidgetOptionData";
 import { extractChartOptionData } from "@/types/extractChartOptionData";
 import { useDraftDashboardStore } from "@/store/useDraftDashboardStore";
 import DashboardLayout from "@/components/layout/dashboard/layout";
+import { useTempPanelStore } from "@/store/useTempPanelStore";
 
 Chart.register(zoomPlugin);
 
@@ -34,6 +35,7 @@ const PannelSection = () => {
   const dashboardId = params.get("id") || "1";
   const pannelId = params.get("pannelId") || undefined;
 
+  const { setTempPanel } = useTempPanelStore();
   const { selectedSection, setSelectedSection } = useSelectedSection();
   const {
     datasets,
@@ -197,24 +199,34 @@ const PannelSection = () => {
       };
     }
 
-    // draft 대시보드에 패널 추가
     if (draftDashboard) {
+      // 새로 만드는 대시보드 → 기존 방식 유지
       addPannelToDraft(newPannel, isEditing);
-      // draft 대시보드로 이동
       router.push(`/detail2?id=${draftDashboard.id}`);
-    }
-    // 기존 대시보드가 있을 경우
-    else if (dashboardId) {
-      if (isEditing) {
-        // 기존 대시보드 패널 수정
-        updatePannelInDashboard(dashboardId, newPannel);
-      } else {
-        // 기존 대시보드에 새 패널 추가
-        addPannelToDashboard(dashboardId, newPannel);
-      }
-      // 기존 대시보드로 이동
+    } else if (dashboardId) {
+      // 기존 대시보드 → 저장 대신 임시로 보관
+      setTempPanel(newPannel, dashboardId);
       router.push(`/detail2?id=${dashboardId}`);
     }
+
+    // // draft 대시보드에 패널 추가
+    // if (draftDashboard) {
+    //   addPannelToDraft(newPannel, isEditing);
+    //   // draft 대시보드로 이동
+    //   router.push(`/detail2?id=${draftDashboard.id}`);
+    // }
+    // // 기존 대시보드가 있을 경우
+    // else if (dashboardId) {
+    //   if (isEditing) {
+    //     // 기존 대시보드 패널 수정
+    //     updatePannelInDashboard(dashboardId, newPannel);
+    //   } else {
+    //     // 기존 대시보드에 새 패널 추가
+    //     addPannelToDashboard(dashboardId, newPannel);
+    //   }
+    //   // 기존 대시보드로 이동
+    //   router.push(`/detail2?id=${dashboardId}`);
+    // }
   };
 
   const handleCancel = () => {
