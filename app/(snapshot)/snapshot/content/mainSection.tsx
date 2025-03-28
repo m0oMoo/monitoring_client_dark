@@ -17,7 +17,7 @@ const SnapshotMainSection = () => {
   };
 
   return (
-    <div className="bg-modern-bg text-modern-text min-h-screen p-4 pt-5">
+    <div className="bg-modern-bg text-modern-text min-h-screen p-4 pt-[44px]">
       <header className="flex justify-between items-center my-3">
         <h1 className="text-xl font-bold">📸 스냅샷 목록</h1>
       </header>
