@@ -25,6 +25,7 @@ import { useDraftDashboardStore } from "@/store/useDraftDashboardStore";
 import DashboardLayout from "@/components/layout/dashboard/layout";
 import { useDashboardStateStore } from "@/store/useDashboardStateStore";
 import { useTempPanelStore } from "@/store/useTempPanelStore";
+import { useEditStateStore } from "@/store/useEditStateStore";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -60,12 +61,14 @@ const DetailDashboard = () => {
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
   const [alertMessage, setAlertMessage] = useState<string>("");
   const [gridLayout, setGridLayout] = useState<Layout[]>([]);
-  const [isEditing, setIsEditing] = useState<boolean>(false);
   const [panels, setPanels] = useState<any[]>([]);
 
   const layouts = useMemo(() => ({ lg: gridLayout }), [gridLayout]);
 
-  console.log(tempPanel);
+  const isEditing = useEditStateStore(
+    (state) => state.editStates[dashboardId] ?? false
+  );
+  const setEditState = useEditStateStore((state) => state.setEditState);
 
   // 대시보드 및 패널 로딩
   useEffect(() => {
@@ -157,7 +160,7 @@ const DetailDashboard = () => {
     if (isEditing) {
       handleSaveDashboard(); // 저장 버튼 클릭 시 저장 처리
     }
-    setIsEditing((prev) => !prev);
+    setEditState(dashboardId, !isEditing);
   };
 
   const handleTabClone = (itemId: string) => {
@@ -238,7 +241,7 @@ const DetailDashboard = () => {
       setGridLayout(originalLayout);
     }
 
-    setIsEditing(false);
+    setEditState(dashboardId, false);
   };
 
   const handlePanelDelete = (pannelId: string) => {
@@ -274,7 +277,6 @@ const DetailDashboard = () => {
   return (
     <div className="bg-modern-bg min-h-[calc(100vh-80px)] pt-6">
       <DashboardLayout
-        isEdit={!isEditing}
         onCreateClick={() => {
           router.push(`/d2?id=${dashboardId}`);
         }}
