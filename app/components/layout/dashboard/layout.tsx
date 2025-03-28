@@ -41,7 +41,6 @@ const DashboardLayout = ({
       <AddChartBar
         isEdit={isEdit ?? false}
         onCreateClick={onCreateClick}
-        onGridChange={onGridChange}
         modifiable={modifiable}
         onEditClick={onEditClick}
         onCancelClick={onCancelClick}
