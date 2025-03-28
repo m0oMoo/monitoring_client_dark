@@ -2,10 +2,10 @@ import React, { ReactNode, useEffect, useState } from "react";
 import AddChartBar from "@/components/bar/addChartBar";
 import TimeRangeBar from "@/components/bar/timeRangeBar";
 import { useSearchParams } from "next/navigation";
+import { useEditStateStore } from "@/store/useEditStateStore";
 
 const DashboardLayout = ({
   children,
-  isEdit,
   onCreateClick,
   onGridChange,
   modifiable,
@@ -14,7 +14,6 @@ const DashboardLayout = ({
   onCallback,
 }: {
   children: ReactNode;
-  isEdit?: boolean;
   onCreateClick: () => void;
   onGridChange?: () => void;
   modifiable?: boolean;
@@ -26,6 +25,14 @@ const DashboardLayout = ({
   const [to, setTo] = useState<string | null>(null);
   const [refreshTime, setRefreshTime] = useState<number | "autoType">(10);
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
+
+  const searchParams = useSearchParams();
+  const dashboardId = searchParams.get("id") || "default"; // 대시보드 ID 가져오기
+  const isEdit = useEditStateStore(
+    (state) => state.editStates[dashboardId] ?? false
+  );
+
+  console.log("편집 상태>>>", isEdit);
 
   // 시간 초기화
   useEffect(() => {
@@ -39,7 +46,7 @@ const DashboardLayout = ({
   return (
     <div>
       <AddChartBar
-        isEdit={isEdit ?? false}
+        isEdit={isEdit}
         onCreateClick={onCreateClick}
         modifiable={modifiable}
         onEditClick={onEditClick}
