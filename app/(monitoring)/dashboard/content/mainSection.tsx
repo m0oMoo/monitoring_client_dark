@@ -226,7 +226,6 @@ const MainSection = () => {
       <AddChartBar
         isEdit={isEditing}
         onCreateClick={() => router.push(`/d?id=${dashboardId}`)}
-        onGridChange={() => {}}
         modifiable={true}
         onEditClick={handleEditClick}
       />
