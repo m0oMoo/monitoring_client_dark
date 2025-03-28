@@ -10,22 +10,24 @@ const Layout = ({ children }: { children: ReactNode }) => {
   const pathname = usePathname();
 
   const [menuOpen, setMenuOpen] = useState<boolean>(true);
-  const { clearTempPanel } = useTempPanelStore();
+  const { tempPanel, clearTempPanel } = useTempPanelStore();
 
   useEffect(() => {
     const path = pathname;
     const isExcluded = path.includes("/d2") || path.includes("/detail2");
-
-    if (!isExcluded) {
-      console.log("삭제함");
-      clearTempPanel();
+    if (tempPanel) {
+      if (!isExcluded) {
+        console.log("삭제함");
+        clearTempPanel();
+      }
     }
-  }, [pathname, clearTempPanel]);
+  }, [pathname, tempPanel]);
 
   return (
     <div className="flex flex-col h-screen">
       {/* Header */}
-      <Header toggleMenu={() => setMenuOpen(!menuOpen)} />ㄴ{/* Left Menu */}
+      <Header toggleMenu={() => setMenuOpen(!menuOpen)} />
+      {/* Left Menu */}
       <div
         className={`fixed left-0 top-[44px] h-full bg-white shadow-md w-60 transition-transform duration-500 ${
           menuOpen ? "translate-x-0" : "-translate-x-64"
@@ -34,8 +36,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
         <LeftMenu />
       </div>
       <main
-        className={`flex-1 transition-all duration-500
-          bg-modern-bg
+        className={`flex-1 transition-all duration-500 bg-modern-bg
           ${menuOpen ? "ml-60" : "ml-0"}`}
       >
         <div className="w-full">{children}</div>
