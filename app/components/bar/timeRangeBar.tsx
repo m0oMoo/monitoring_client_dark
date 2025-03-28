@@ -66,7 +66,7 @@ const TimeRangeBar: React.FC<TimeRangeBarProps> = ({
       <div className="pl-4">
         <TimeRangePicker from={from} to={to} onChange={onChange} />
       </div>
-      <div className="flex items-center p-3 gap-2">
+      <div className="flex items-center py-1.5 px-3 gap-2">
         <div className="flex flex-row">
           <p className=" text-sm2 mr-1">Last Update : </p>
           <p className="text-sm mr-3">{lastUpdated}</p>
