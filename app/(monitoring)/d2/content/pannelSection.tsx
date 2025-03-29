@@ -88,6 +88,8 @@ const PannelSection = () => {
   const { addPannelToDashboard, updatePannelInDashboard, getDashboardById } =
     useDashboardStore2();
   const { draftDashboard, addPannelToDraft } = useDraftDashboardStore();
+  const { tempPanel, tempPanelTargetDashboardId } = useTempPanelStore();
+
   const dashboard = getDashboardById(dashboardId);
 
   const existingPannel = pannelId
@@ -96,19 +98,27 @@ const PannelSection = () => {
       : dashboard?.pannels.find((p) => p.pannelId === pannelId)
     : null;
 
+  // tempPanel 우선 처리
+  const targetPannel =
+    tempPanel &&
+    tempPanelTargetDashboardId === dashboardId &&
+    tempPanel.pannelId === pannelId
+      ? tempPanel
+      : existingPannel;
+
   // 기존 패널 수정 시, context에 값 세팅
   useEffect(() => {
-    if (!existingPannel) return;
+    if (!targetPannel) return;
 
-    if (existingPannel.pannelType === "chart") {
+    if (targetPannel.pannelType === "chart") {
       setSelectedSection("chartOption");
-      setOptions(existingPannel.pannelOptions as ChartOptionData);
-      setDatasets(existingPannel.datasets);
-    } else if (existingPannel.pannelType === "widget") {
+      setOptions(targetPannel.pannelOptions as ChartOptionData);
+      setDatasets(targetPannel.datasets);
+    } else if (targetPannel.pannelType === "widget") {
       setSelectedSection("widgetOption");
-      setWidgetOptions(existingPannel.pannelOptions as WidgetOptionData);
+      setWidgetOptions(targetPannel.pannelOptions as WidgetOptionData);
     }
-  }, [existingPannel]);
+  }, [targetPannel]);
 
   const handleCreateClick = () => {
     const isEditing = !!existingPannel;
@@ -199,7 +209,10 @@ const PannelSection = () => {
       };
     }
 
-    if (draftDashboard) {
+    console.log(draftDashboard);
+    console.log(draftDashboard?.id === dashboardId);
+
+    if (draftDashboard?.id === dashboardId) {
       // 새로 만드는 대시보드 → 기존 방식 유지
       addPannelToDraft(newPannel, isEditing);
       router.push(`/detail2?id=${draftDashboard.id}`);
