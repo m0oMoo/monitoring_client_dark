@@ -182,9 +182,10 @@ const DetailDashboard = () => {
   useEffect(() => {
     if (!dashboard) return;
 
+    if (isEditing) return; // 👈 편집 모드일 때는 패널 상태 초기화 방지
+
     const basePanels = dashboard.pannels ?? [];
 
-    // 💡 tempPanel을 panel 상태와 항상 병합
     const mergedPanels =
       tempPanel && tempPanelTargetDashboardId === dashboardId
         ? (() => {
@@ -216,9 +217,10 @@ const DetailDashboard = () => {
   }, [
     dashboard?.id,
     JSON.stringify(dashboard?.pannels),
-    JSON.stringify(tempPanel), // 💡 tempPanel이 변경되면 재실행됨
+    JSON.stringify(tempPanel),
     tempPanelTargetDashboardId,
     dashboardId,
+    isEditing, // 👈 의존성에도 추가!
   ]);
 
   const handleCancel = () => {
