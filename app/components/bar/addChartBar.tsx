@@ -1,8 +1,9 @@
-"use client";
-
-import { useRouter, useSearchParams } from "next/navigation";
+import React, { useEffect, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useDashboardStateStore } from "@/store/useDashboardStateStore";
 import { useDashboardStore2 } from "@/store/useDashboard2Store";
-import { useState, useEffect } from "react";
+import { useDraftDashboardStore } from "@/store/useDraftDashboardStore";
+import { Eye, EyeOff } from "lucide-react";
 
 interface AddChartBarProps {
   isEdit: boolean;
@@ -10,11 +11,9 @@ interface AddChartBarProps {
   onEditClick?: () => void;
   onSaveClick?: () => void;
   onCancelClick?: () => void;
-  gridCols?: number;
-  onGridChange?: (change: number) => void;
-  gridVisible?: boolean;
   modifiable?: boolean;
-  onCallback?: (title: string, description: string) => void;
+  isEditingTitleValue?: boolean;
+  isEditingDescValue?: boolean;
 }
 
 const AddChartBar = ({
@@ -23,149 +22,212 @@ const AddChartBar = ({
   onEditClick,
   onSaveClick,
   onCancelClick,
-  gridCols,
-  onGridChange,
-  gridVisible = false,
   modifiable = false,
-  onCallback,
+  isEditingTitleValue = true,
+  isEditingDescValue = true,
 }: AddChartBarProps) => {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
-  const dashboardId = searchParams.get("id") || undefined;
-  const { getDashboardById, updateDashboard } = useDashboardStore2();
-  const dashboard = dashboardId ? getDashboardById(dashboardId) : undefined;
+  const dashboardId = searchParams.get("id") || "1";
 
-  const [title, setTitle] = useState<string | undefined>(undefined); // Initial value as undefined to handle hydration issue
-  const [description, setDescription] = useState<string | undefined>(undefined);
-  const [isEditingTitle, setIsEditingTitle] = useState(false);
-  const [isEditingDesc, setIsEditingDesc] = useState(false);
+  const { getDashboardById } = useDashboardStore2();
+  const { draftDashboard } = useDraftDashboardStore();
+  const { title, description, setTitle, setDescription } =
+    useDashboardStateStore();
 
+  const [isEditingTitle, setIsEditingTitle] = useState<boolean>(false);
+  const [isEditingDesc, setIsEditingDesc] = useState<boolean>(false);
+  const [isDescriptionVisible, setIsDescriptionVisible] =
+    useState<boolean>(true);
+
+  // 대시보드 및 패널 로딩
   useEffect(() => {
-    if (dashboard) {
-      setTitle(dashboard.label);
-      setDescription(dashboard.description || "");
+    // 1. draftDashboard와 ID가 일치하면 draft에서 가져오기
+    if (dashboardId === draftDashboard?.id && draftDashboard) {
+      setTitle(draftDashboard.label);
+      setDescription(draftDashboard.description || "");
+      return;
     }
-  }, [dashboard]);
-
-  const handleGoBack = () => {
-    router.push("/dashboard");
-  };
+    // 2. 아니라면 기존 대시보드에서 가져오기
+    const matchedDashboard = getDashboardById(dashboardId);
+    if (matchedDashboard) {
+      setTitle(matchedDashboard.label);
+      setDescription(matchedDashboard.description || "");
+    } else {
+      console.log("대시보드가 없습니다.");
+    }
+  }, [dashboardId, draftDashboard, getDashboardById, setTitle, setDescription]);
 
   const handleSaveTitleDesc = () => {
-    if (dashboardId && dashboard) {
-      updateDashboard({
-        ...dashboard,
-        label: title!,
-        description: description!,
+    const updateStore = draftDashboard
+      ? useDraftDashboardStore.getState().updateDraftDashboard
+      : useDashboardStore2.getState().updateDashboard;
+
+    const currentDashboard = draftDashboard || getDashboardById(dashboardId);
+
+    if (currentDashboard) {
+      updateStore({
+        ...currentDashboard,
+        label: title,
+        description: description,
       });
     }
+
+    setIsEditingTitle(false);
+    setIsEditingDesc(false);
   };
 
-  useEffect(() => {
-    if (typeof title !== "undefined" && typeof description !== "undefined") {
-      if (onCallback) {
-        onCallback(title, description);
-      }
-    }
-  }, [title, description, onCallback]);
+  // title, description 수정 시 저장
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setTitle(e.target.value); // 실시간으로 Zustand 상태 업데이트
+  };
+
+  const handleDescChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setDescription(e.target.value); // 실시간으로 Zustand 상태 업데이트
+  };
+
+  const handleGoBack = () => {
+    router.push("/dashboard2");
+  };
 
   return (
-    <div
-      className={`flex justify-between items-center mt-[44px] bg-modern-bg
-      border-b border-modern-border border-0.5 py-1.5 px-4`}
-    >
-      {/* breadcrumb + 이름/설명 인라인 수정 */}
-      <div>
-        <div className="text-lg1 text-modern-text_disable">
-          <span
-            className="text-text1 cursor-pointer hover:underline"
-            onClick={handleGoBack}
-          >
-            Dashboard
-          </span>
-          &nbsp; {">"}
-          {isEditingTitle ? (
-            <input
-              value={title}
-              autoFocus
-              onChange={(e) => setTitle(e.target.value)}
-              onBlur={() => {
-                setIsEditingTitle(false);
-                handleSaveTitleDesc();
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  setIsEditingTitle(false);
-                  handleSaveTitleDesc();
-                }
-              }}
-              className="border bg-transparent px-2 py-0.5 rounded ml-1 text-modern-text w-64"
-            />
-          ) : (
+    <>
+      <div className="flex justify-between items-center mt-5 bg-modern-bg border-b border-modern-border border-0.5 py-1.5 px-3">
+        {/* breadcrumb + 이름/설명 인라인 수정 */}
+        <div>
+          <div className="flex text-lg1 text-modern-text_disable">
             <span
-              onClick={() => setIsEditingTitle(true)}
-              className="text-modern-text ml-1 cursor-pointer hover:underline"
+              className="text-text1 cursor-pointer hover:underline"
+              onClick={handleGoBack}
             >
-              {title || "제목 없음"}
+              Dashboard
             </span>
-          )}
+            &nbsp; {">"} &nbsp;
+            {isEditingTitleValue ? (
+              <>
+                {isEditingTitle ? (
+                  <input
+                    value={title}
+                    autoFocus
+                    onChange={handleTitleChange}
+                    onBlur={() => {
+                      setIsEditingTitle(false);
+                      handleSaveTitleDesc(); // 실시간 저장
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        setIsEditingTitle(false);
+                        handleSaveTitleDesc(); // 실시간 저장
+                      }
+                    }}
+                    className="border bg-transparent px-2 py-0.5 rounded ml-1 text-modern-text w-64"
+                  />
+                ) : (
+                  <div className="flex gap-3 items-center justify-center">
+                    <span
+                      onClick={() => setIsEditingTitle(true)}
+                      className="text-modern-text ml-1 cursor-pointer hover:underline"
+                    >
+                      {title || "제목 없음"}
+                    </span>
+                    <button
+                      className="px-2 py-0.5 rounded text-modern-subtext"
+                      onClick={() => setIsDescriptionVisible((prev) => !prev)}
+                    >
+                      {isDescriptionVisible ? (
+                        <Eye size={16} />
+                      ) : (
+                        <EyeOff size={16} />
+                      )}
+                    </button>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="flex gap-3 items-center justify-center">
+                <span className="text-modern-text ml-1">
+                  {title || "제목 없음"}
+                </span>
+                <button
+                  className="hover:bg-modern-border border px-2 py-0.5 rounded text-modern-subtext"
+                  onClick={() => setIsDescriptionVisible((prev) => !prev)}
+                >
+                  {isDescriptionVisible ? (
+                    <Eye size={16} />
+                  ) : (
+                    <EyeOff size={16} />
+                  )}
+                </button>
+              </div>
+            )}
+          </div>
+          {isDescriptionVisible &&
+            (isEditingDescValue ? (
+              isEditingDesc ? (
+                <input
+                  value={description}
+                  autoFocus
+                  onChange={handleDescChange}
+                  onBlur={() => {
+                    setIsEditingDesc(false);
+                    handleSaveTitleDesc(); // 실시간 저장
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      setIsEditingDesc(false);
+                      handleSaveTitleDesc(); // 실시간 저장
+                    }
+                  }}
+                  className="text-sm mt-1 text-modern-subtext bg-transparent border px-2 py-0.5 rounded"
+                  placeholder="설명 입력"
+                />
+              ) : (
+                <p
+                  onClick={() => setIsEditingDesc(true)}
+                  className="text-sm mt-1 text-modern-subtext cursor-pointer hover:underline"
+                >
+                  {description || "설명 없음"}
+                </p>
+              )
+            ) : (
+              <p className="text-sm mt-1 text-modern-subtext">
+                {description || "설명 없음"}
+              </p>
+            ))}
         </div>
-        {isEditingDesc ? (
-          <input
-            value={description}
-            autoFocus
-            onChange={(e) => setDescription(e.target.value)}
-            onBlur={() => {
-              setIsEditingDesc(false);
-              handleSaveTitleDesc();
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                setIsEditingDesc(false);
-                handleSaveTitleDesc();
-              }
-            }}
-            className="text-sm mt-1 text-modern-subtext bg-transparent border px-2 py-0.5 rounded"
-            placeholder="설명 입력"
-          />
-        ) : (
-          <p
-            onClick={() => setIsEditingDesc(true)}
-            className="text-sm mt-1 text-modern-subtext cursor-pointer hover:underline"
-          >
-            {description || "설명 없음"}
-          </p>
-        )}
-      </div>
 
-      {/* 버튼들 */}
-      <div className="flex flex-row gap-5">
-        <div className="flex flex-row gap-2 text-sm1">
-          {!isEdit && (
-            <button
-              className="hover:bg-modern-point_20 bg-modern-point_10 px-2 py-0.5 text-modern-point border-modern-point"
-              onClick={onCancelClick}
-            >
-              cancel
-            </button>
-          )}
-          {modifiable && (
-            <button
-              className="hover:bg-modern-point_20 bg-modern-point_10 px-2 py-0.5 text-modern-point border-modern-point"
-              onClick={onEditClick}
-            >
-              {isEdit ? "Edit" : "Save"}
-            </button>
-          )}
-          <button
-            className="border hover:bg-modern-point_20 bg-modern-point_10 px-2 py-1 text-modern-point border-modern-point"
-            onClick={onCreateClick}
-          >
-            Create
-          </button>
+        {/* 버튼들 */}
+        <div className="flex flex-row gap-5">
+          <div className="flex flex-row gap-2 text-sm1">
+            {isEdit && (
+              <button
+                className="hover:bg-modern-point_20 bg-modern-point_10 px-2 py-0.5 text-modern-point border-modern-point"
+                onClick={onCancelClick}
+              >
+                cancel
+              </button>
+            )}
+            {modifiable && (
+              <button
+                className="border hover:bg-modern-point_20 bg-modern-point_10 px-2 py-1 text-modern-point border-modern-point"
+                onClick={onEditClick}
+              >
+                {isEdit ? "Save" : "Edit"}
+              </button>
+            )}
+            {isEdit && (
+              <button
+                className="border hover:bg-modern-point_20 bg-modern-point_10 px-2 py-1 text-modern-point border-modern-point"
+                onClick={onCreateClick}
+              >
+                Create
+              </button>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

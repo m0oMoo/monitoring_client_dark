@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Layout, Responsive, WidthProvider } from "react-grid-layout";
 import { MoreVertical } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
+import { isEqual } from "lodash";
 
 import Alert from "@/components/alert/alert";
 import TabMenu from "@/components/menu/tabMenu";
@@ -25,7 +26,6 @@ import { useDraftDashboardStore } from "@/store/useDraftDashboardStore";
 import DashboardLayout from "@/components/layout/dashboard/layout";
 import { useDashboardStateStore } from "@/store/useDashboardStateStore";
 import { useTempPanelStore } from "@/store/useTempPanelStore";
-import { useEditStateStore } from "@/store/useEditStateStore";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -61,174 +61,147 @@ const DetailDashboard = () => {
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
   const [alertMessage, setAlertMessage] = useState<string>("");
   const [gridLayout, setGridLayout] = useState<Layout[]>([]);
-  const [panels, setPanels] = useState<any[]>([]);
+  const [isEditing, setIsEditing] = useState<boolean>(false);
+
+  const displayedPanels = useMemo(() => {
+    const base = dashboard?.pannels ?? [];
+    if (tempPanel && tempPanelTargetDashboardId === dashboardId) {
+      const isEdit = base.some((p) => p.pannelId === tempPanel.pannelId);
+      return isEdit
+        ? base.map((p) => (p.pannelId === tempPanel.pannelId ? tempPanel : p))
+        : [...base, tempPanel];
+    }
+    return base;
+  }, [dashboard, tempPanel, tempPanelTargetDashboardId, dashboardId]);
 
   const layouts = useMemo(() => ({ lg: gridLayout }), [gridLayout]);
 
-  const isEditing = useEditStateStore(
-    (state) => state.editStates[dashboardId] ?? false
-  );
-  const setEditState = useEditStateStore((state) => state.setEditState);
-
-  // 대시보드 및 패널 로딩
   useEffect(() => {
-    // draftDashboard가 있을 때만 설정
+    if (dashboard) {
+      const newLayout = displayedPanels.map((panel) => ({
+        i: panel.pannelId,
+        x: panel.gridPos.x,
+        y: panel.gridPos.y,
+        w: panel.gridPos.w,
+        h: panel.gridPos.h,
+        minW:
+          panel.pannelType === "widget" ? MIN_WIDGET_WIDTH : MIN_CHART_WIDTH,
+        minH:
+          panel.pannelType === "widget" ? MIN_WIDGET_HEIGHT : MIN_CHART_HEIGHT,
+      }));
+      setGridLayout(newLayout);
+    }
+  }, [displayedPanels, dashboard, isEditing]);
+
+  useEffect(() => {
     if (dashboardId === draftDashboard?.id) {
-      setDashboard(draftDashboard); // 기존 대시보드 로드
+      setDashboard(draftDashboard);
     } else {
-      const fetchedDashboard = getDashboardById(dashboardId);
-      if (fetchedDashboard) {
-        setDashboard(fetchedDashboard); // 기존 대시보드 로드
-      } else {
-        console.log("대시보드가 없습니다."); // 대시보드가 없을 경우 로깅
-      }
+      const fetched = getDashboardById(dashboardId);
+      if (fetched) setDashboard(fetched);
     }
   }, [dashboardId, draftDashboard]);
 
-  const handleLayoutChange = (layout: Layout[]) => {
-    const updatedPanels = panels.map((panel) => {
-      const updatedLayout = layout.find((item) => item.i === panel.pannelId);
-      if (updatedLayout) {
-        const updatedPanel = {
-          ...panel,
-          gridPos: {
-            x: updatedLayout.x,
-            y: updatedLayout.y,
-            w: updatedLayout.w,
-            h: updatedLayout.h,
-          },
-        };
+  const handleLayoutChange = useCallback(
+    (layout: Layout[]) => {
+      // 실제 레이아웃 변경 여부를 엄격하게 확인
+      const hasActualChange = layout.some((newItem, index) => {
+        const oldItem = gridLayout[index];
+        return (
+          !oldItem ||
+          oldItem.x !== newItem.x ||
+          oldItem.y !== newItem.y ||
+          oldItem.w !== newItem.w ||
+          oldItem.h !== newItem.h
+        );
+      });
 
-        // tempPanel도 업데이트
-        if (
-          tempPanel &&
-          tempPanelTargetDashboardId === dashboardId &&
-          panel.pannelId === tempPanel.pannelId
-        ) {
-          setTempPanel(updatedPanel, dashboardId); // store 업데이트
+      if (!hasActualChange) return;
+
+      // 새로운 레이아웃으로 업데이트
+      setGridLayout(layout);
+
+      // 임시 패널의 레이아웃만 업데이트
+      if (tempPanel && tempPanelTargetDashboardId === dashboardId) {
+        const item = layout.find((l) => l.i === tempPanel.pannelId);
+        if (item) {
+          const newGridPos = { x: item.x, y: item.y, w: item.w, h: item.h };
+          // 실제 그리드 위치가 변경된 경우에만 업데이트
+          if (!isEqual(newGridPos, tempPanel.gridPos)) {
+            setTempPanel({ ...tempPanel, gridPos: newGridPos }, dashboardId);
+          }
         }
-
-        return updatedPanel;
       }
-      return panel;
-    });
-
-    setPanels(updatedPanels);
-    setGridLayout(layout);
-  };
+    },
+    [
+      gridLayout,
+      tempPanel,
+      tempPanelTargetDashboardId,
+      dashboardId,
+      setTempPanel,
+    ]
+  );
 
   const handleSaveDashboard = () => {
-    if (panels.length === 0) {
+    if (displayedPanels.length === 0) {
       setAlertMessage(
         "패널을 하나 이상 추가해야 대시보드를 저장할 수 있습니다."
       );
       return;
     }
 
-    // tempPanel 병합 처리
-    let finalPanels = [...panels];
+    let finalPanels = dashboard?.pannels ?? [];
     if (tempPanel && tempPanelTargetDashboardId === dashboardId) {
-      const isEdit = panels.some((p) => p.pannelId === tempPanel.pannelId);
+      const isEdit = finalPanels.some((p) => p.pannelId === tempPanel.pannelId);
       finalPanels = isEdit
-        ? panels.map((p) => (p.pannelId === tempPanel.pannelId ? tempPanel : p))
-        : [...panels, tempPanel];
+        ? finalPanels.map((p) =>
+            p.pannelId === tempPanel.pannelId ? tempPanel : p
+          )
+        : [...finalPanels, tempPanel];
     }
 
-    const updatedDashboard: Dashboard = {
-      id: dashboardId === draftDashboard?.id ? draftDashboard?.id : dashboardId,
+    // ✅ gridLayout의 위치 정보를 반영
+    const updatedPanels = finalPanels.map((panel) => {
+      const layout = gridLayout.find((item) => item.i === panel.pannelId);
+      if (!layout) return panel;
+      return {
+        ...panel,
+        gridPos: {
+          x: layout.x,
+          y: layout.y,
+          w: layout.w,
+          h: layout.h,
+        },
+      };
+    });
+
+    const updated: Dashboard = {
+      ...dashboard!,
       label: title,
       description,
-      pannels: finalPanels,
+      pannels: updatedPanels,
     };
 
     if (dashboardId !== draftDashboard?.id) {
-      updateDashboard(updatedDashboard);
-      setDashboard(updatedDashboard);
+      updateDashboard(updated);
+      setDashboard(updated);
+      clearTempPanel();
       setAlertMessage("대시보드가 업데이트되었습니다.");
     } else {
-      addDashboard(updatedDashboard);
-      setDashboard(updatedDashboard);
+      addDashboard(updated);
       const newId = uuidv4();
       setDashboardId(newId);
-      // router.replace(`/detail2?id=${newId}`);
+      router.replace(`/detail2?id=${newId}`);
       setAlertMessage("대시보드가 저장되었습니다.");
     }
-
-    clearTempPanel(); // 💥 저장 후 임시 저장 제거
   };
-
-  const handleEditClick = () => {
-    if (isEditing) {
-      handleSaveDashboard(); // 저장 버튼 클릭 시 저장 처리
-    }
-    setEditState(dashboardId, !isEditing);
-  };
-
-  const handleTabClone = (itemId: string) => {
-    setSelectedItem(itemId);
-    setIsCloneModalOpen(true);
-  };
-
-  const confirmClone = () => {
-    if (selectedItem && selectedDashboard) {
-      clonePannelToDashboard(dashboardId, selectedItem, selectedDashboard);
-      setAlertMessage("복제 완료!");
-    }
-    setIsCloneModalOpen(false);
-    setSelectedItem(null);
-    setSelectedDashboard(null);
-  };
-
-  useEffect(() => {
-    if (!dashboard) return;
-
-    if (isEditing) return; // 👈 편집 모드일 때는 패널 상태 초기화 방지
-
-    const basePanels = dashboard.pannels ?? [];
-
-    const mergedPanels =
-      tempPanel && tempPanelTargetDashboardId === dashboardId
-        ? (() => {
-            const isEdit = basePanels.some(
-              (p) => p.pannelId === tempPanel.pannelId
-            );
-            return isEdit
-              ? basePanels.map((p) =>
-                  p.pannelId === tempPanel.pannelId ? tempPanel : p
-                )
-              : [...basePanels, tempPanel];
-          })()
-        : basePanels;
-
-    setPanels(mergedPanels);
-
-    const newLayout = mergedPanels.map((panel) => ({
-      i: panel.pannelId,
-      x: panel.gridPos.x,
-      y: panel.gridPos.y,
-      w: panel.gridPos.w,
-      h: panel.gridPos.h,
-      minW: panel.pannelType === "widget" ? MIN_WIDGET_WIDTH : MIN_CHART_WIDTH,
-      minH:
-        panel.pannelType === "widget" ? MIN_WIDGET_HEIGHT : MIN_CHART_HEIGHT,
-    }));
-
-    setGridLayout(newLayout);
-  }, [
-    dashboard?.id,
-    JSON.stringify(dashboard?.pannels),
-    JSON.stringify(tempPanel),
-    tempPanelTargetDashboardId,
-    dashboardId,
-    isEditing, // 👈 의존성에도 추가!
-  ]);
 
   const handleCancel = () => {
-    clearTempPanel(); // 💡 tempPanel 수동 제거
-
     if (dashboard) {
-      setPanels(dashboard.pannels);
+      // 패널 원복
+      setDashboard(dashboard); // 💡 패널 복원
 
+      // 레이아웃 복원
       const originalLayout = dashboard.pannels.map((panel) => ({
         i: panel.pannelId,
         x: panel.gridPos.x,
@@ -241,34 +214,25 @@ const DetailDashboard = () => {
           panel.pannelType === "widget" ? MIN_WIDGET_HEIGHT : MIN_CHART_HEIGHT,
       }));
 
-      setGridLayout(originalLayout);
+      setGridLayout(originalLayout); // 💡 레이아웃 복원
     }
 
-    setEditState(dashboardId, false);
+    clearTempPanel();
+    setIsEditing(false);
+    setAlertMessage("Changes canceled");
   };
 
-  const handlePanelDelete = (pannelId: string) => {
-    if (isEditing) {
-      // Edit 모드에서만 삭제 가능
-      // 패널 리스트에서만 삭제 (실제 저장은 Save 버튼 클릭 시)
-      const filteredPanels = panels.filter(
-        (panel) => panel.pannelId !== pannelId
-      );
-      setPanels(filteredPanels);
-
-      // 레이아웃에서도 삭제
-      const filteredLayout = gridLayout.filter((item) => item.i !== pannelId);
-      setGridLayout(filteredLayout);
-
-      setAlertMessage(
-        "패널이 삭제되었습니다. 저장하려면 Save 버튼을 클릭하세요."
-      );
-    } else {
-      setAlertMessage("편집 모드에서만 패널을 삭제할 수 있습니다.");
+  const confirmClone = () => {
+    if (selectedItem && selectedDashboard) {
+      clonePannelToDashboard(dashboardId, selectedItem, selectedDashboard);
+      setAlertMessage("복제 완료!");
     }
+    setIsCloneModalOpen(false);
+    setSelectedItem(null);
+    setSelectedDashboard(null);
   };
 
-  // 패널 수정으로 이동하는 함수 (라우팅)
+  // 패널 수정으로 이동하는 함수
   const handlePanelEdit = (pannelId: string) => {
     if (isEditing) {
       router.push(`/d2?id=${dashboardId}&pannelId=${pannelId}`);
@@ -277,15 +241,69 @@ const DetailDashboard = () => {
     }
   };
 
+  // 패널 삭제 함수
+  const handlePanelDelete = (pannelId: string) => {
+    if (!isEditing) {
+      setAlertMessage("편집 모드에서만 패널을 삭제할 수 있습니다.");
+      return;
+    }
+
+    if (tempPanel && tempPanel.pannelId === pannelId) {
+      clearTempPanel();
+      setAlertMessage("임시 패널이 삭제되었습니다.");
+      return;
+    }
+
+    if (!dashboard) return;
+
+    const remainingPanels = dashboard.pannels.filter(
+      (p) => p.pannelId !== pannelId
+    );
+
+    // ✅ 현재 gridLayout 기준으로 위치 정보 갱신
+    const updatedPanels = remainingPanels.map((panel) => {
+      const layout = gridLayout.find((item) => item.i === panel.pannelId);
+      return layout
+        ? {
+            ...panel,
+            gridPos: {
+              x: layout.x,
+              y: layout.y,
+              w: layout.w,
+              h: layout.h,
+            },
+          }
+        : panel;
+    });
+
+    // ✅ UI에만 반영
+    setDashboard({ ...dashboard, pannels: updatedPanels });
+    setAlertMessage("패널이 삭제되었습니다. 저장하려면 Save를 누르세요.");
+  };
+
+  // 패널 복제 함수
+  const handleTabClone = (itemId: string) => {
+    setSelectedItem(itemId);
+    setIsCloneModalOpen(true);
+  };
+
   return (
-    <div className="bg-modern-bg min-h-[calc(100vh-80px)] pt-6">
+    <div className="bg-modern-bg min-h-[calc(100vh-80px)]">
       <DashboardLayout
-        onCreateClick={() => {
-          router.push(`/d2?id=${dashboardId}`);
-        }}
-        onGridChange={() => {}}
+        isEdit={!isEditing}
+        onCreateClick={() => router.push(`/d2?id=${dashboardId}`)}
         modifiable={true}
-        onEditClick={handleEditClick}
+        onEditClick={() => {
+          if (!isEditing) {
+            // 읽기 전용 -> 수정 모드로 진입
+            setIsEditing(true);
+            setAlertMessage("Edit Mode Activated");
+          } else {
+            // 수정 모드 -> 읽기 전용으로 저장 후 전환
+            handleSaveDashboard();
+            setIsEditing(false);
+          }
+        }}
         onCancelClick={handleCancel}
       >
         <ResponsiveGridLayout
@@ -301,7 +319,7 @@ const DetailDashboard = () => {
           draggableHandle=".drag-handle"
           resizeHandles={["se"]}
         >
-          {panels.map((panel) => {
+          {displayedPanels.map((panel) => {
             const layout = gridLayout.find(
               (item) => item.i === panel.pannelId
             ) || {
@@ -315,11 +333,7 @@ const DetailDashboard = () => {
             };
 
             return (
-              <div
-                key={panel.pannelId}
-                data-grid={layout}
-                //   className="drag-handle cursor-grab"
-              >
+              <div key={panel.pannelId} data-grid={layout}>
                 {isEditing && (
                   <div
                     className="absolute top-2 right-2 z-10"

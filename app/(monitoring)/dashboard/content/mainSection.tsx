@@ -26,7 +26,7 @@ import WidgetPannel from "@/components/pannel/widget/widgetPannel";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
-const DetailDashboard = () => {
+const MainSection = () => {
   const router = useRouter();
   const id = useSearchParams();
   const dashboardId = id.get("id") || "1";
@@ -452,4 +452,4 @@ const DetailDashboard = () => {
   );
 };
 
-export default DetailDashboard;
+export default MainSection;

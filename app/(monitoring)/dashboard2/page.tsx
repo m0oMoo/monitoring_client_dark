@@ -2,16 +2,18 @@
 
 import React, { useState, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
-import { MoreVertical } from "lucide-react";
+import { Camera, MoreVertical } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Alert from "@/components/alert/alert";
 import TabMenu from "@/components/menu/tabMenu";
 import SearchInput from "@/components/search/searchInput";
 import { useDashboardStore2 } from "@/store/useDashboard2Store";
+import { useDraftDashboardStore } from "@/store/useDraftDashboardStore";
 
 const Dashboard2Page = () => {
   const router = useRouter();
   const { dashboardList } = useDashboardStore2();
+  const { draftDashboard, startDraftDashboard } = useDraftDashboardStore();
 
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [editingTabIndex, setEditingTabIndex] = useState<string | null>(null);
@@ -59,6 +61,19 @@ const Dashboard2Page = () => {
     }
   }, [alertMessage]);
 
+  // 대시보드 추가 버튼 클릭 시 처리
+  const handleAddDashboard = async () => {
+    const newDashboardId = uuidv4();
+
+    startDraftDashboard({
+      id: newDashboardId,
+      label: "새 대시보드",
+      description: "대시보드 설명",
+    });
+
+    router.push(`/detail2?id=${newDashboardId}`);
+  };
+
   return (
     <div
       className="bg-modern-bg text-modern-text min-h-screen p-4 pt-[44px]"
@@ -74,7 +89,16 @@ const Dashboard2Page = () => {
             onSearchChange={handleSearchChange}
           />
           <button
-            onClick={() => router.push("/detail2")} // ✅ 단순 이동
+            onClick={() => {
+              router.push("/snapshot");
+            }}
+            className="flex items-center gap-2 bg-transparent py-1.5 px-2 text-modern-text border-modern-text text-sm
+  hover:bg-modern-white_10 justify-self-end border"
+          >
+            <Camera size={18} className="text-modern-text" /> 스냅샷 보기
+          </button>
+          <button
+            onClick={handleAddDashboard}
             className="flex bg-modern-point_10 py-1.5 px-2 text-modern-point border border-modern-point text-sm
   hover:bg-modern-point_20 justify-self-end"
           >
@@ -101,7 +125,7 @@ const Dashboard2Page = () => {
                 <MoreVertical
                   className="text-text3 cursor-pointer hover:text-text2"
                   onClick={(e) => {
-                    e.stopPropagation(); 
+                    e.stopPropagation();
                     setMenuOpenIndex(menuOpenIndex === tab.id ? null : tab.id);
                   }}
                 />
