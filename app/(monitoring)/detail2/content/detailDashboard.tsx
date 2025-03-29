@@ -147,9 +147,10 @@ const DetailDashboard = () => {
       setAlertMessage("대시보드가 업데이트되었습니다.");
     } else {
       addDashboard(updatedDashboard);
+      setDashboard(updatedDashboard);
       const newId = uuidv4();
       setDashboardId(newId);
-      router.replace(`/detail2?id=${newId}`);
+      // router.replace(`/detail2?id=${newId}`);
       setAlertMessage("대시보드가 저장되었습니다.");
     }
 
