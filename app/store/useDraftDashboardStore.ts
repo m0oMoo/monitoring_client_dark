@@ -17,6 +17,7 @@ interface DashboardStore {
   updateDraftDashboard: (updatedDraftDashboard: DraftDashboard) => void;
   cancelDraftDashboard: () => void;
   deleteDraftDashboard: () => void;
+  resetDraftDashboard: () => void;
 }
 
 export const useDraftDashboardStore = create<DashboardStore>()((set, get) => ({
@@ -88,6 +89,10 @@ export const useDraftDashboardStore = create<DashboardStore>()((set, get) => ({
   },
 
   deleteDraftDashboard: () => {
+    set({ draftDashboard: null });
+  },
+
+  resetDraftDashboard: () => {
     set({ draftDashboard: null });
   },
 }));
