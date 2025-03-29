@@ -5,23 +5,29 @@ import Header from "./header";
 import LeftMenu from "./leftMenu";
 import { usePathname } from "next/navigation";
 import { useTempPanelStore } from "@/store/useTempPanelStore";
+import { useDraftDashboardStore } from "@/store/useDraftDashboardStore";
 
 const Layout = ({ children }: { children: ReactNode }) => {
   const pathname = usePathname();
 
   const [menuOpen, setMenuOpen] = useState<boolean>(true);
   const { tempPanel, clearTempPanel } = useTempPanelStore();
+  const { draftDashboard, resetDraftDashboard } = useDraftDashboardStore();
 
   useEffect(() => {
     const path = pathname;
     const isExcluded = path.includes("/d2") || path.includes("/detail2");
     if (tempPanel) {
       if (!isExcluded) {
-        console.log("삭제함");
+        console.log("tempPanel 삭제함");
         clearTempPanel();
       }
     }
-  }, [pathname, tempPanel]);
+    if (draftDashboard) {
+      resetDraftDashboard();
+      console.log("draftPanel 삭제함");
+    }
+  }, [pathname, tempPanel, draftDashboard]);
 
   return (
     <div className="flex flex-col h-screen">
