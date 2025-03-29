@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useDashboardStateStore } from "@/store/useDashboardStateStore";
 import { useDashboardStore2 } from "@/store/useDashboard2Store";
 import { useDraftDashboardStore } from "@/store/useDraftDashboardStore";
@@ -27,6 +27,7 @@ const AddChartBar = ({
   isEditingDescValue = true,
 }: AddChartBarProps) => {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const dashboardId = searchParams.get("id") || "1";
 
@@ -42,16 +43,17 @@ const AddChartBar = ({
 
   // 대시보드 및 패널 로딩
   useEffect(() => {
-    // 대시보드 ID를 기준으로 대시보드 선택
-    const currentDashboard =
-      dashboardId === draftDashboard?.id
-        ? draftDashboard
-        : getDashboardById(dashboardId);
-
-    if (currentDashboard) {
-      // 첫 로딩 시 title과 description 세팅
-      setTitle(currentDashboard.label);
-      setDescription(currentDashboard.description || "");
+    // 1. draftDashboard와 ID가 일치하면 draft에서 가져오기
+    if (dashboardId === draftDashboard?.id && draftDashboard) {
+      setTitle(draftDashboard.label);
+      setDescription(draftDashboard.description || "");
+      return;
+    }
+    // 2. 아니라면 기존 대시보드에서 가져오기
+    const matchedDashboard = getDashboardById(dashboardId);
+    if (matchedDashboard) {
+      setTitle(matchedDashboard.label);
+      setDescription(matchedDashboard.description || "");
     } else {
       console.log("대시보드가 없습니다.");
     }

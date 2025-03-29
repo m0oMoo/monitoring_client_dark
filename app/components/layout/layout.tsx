@@ -17,17 +17,20 @@ const Layout = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const path = pathname;
     const isExcluded = path.includes("/d2") || path.includes("/detail2");
+
     if (tempPanel) {
       if (!isExcluded) {
         console.log("tempPanel 삭제함");
         clearTempPanel();
       }
     }
-    if (draftDashboard) {
-      resetDraftDashboard();
-      console.log("draftPanel 삭제함");
-    }
-  }, [pathname, tempPanel, draftDashboard]);
+    // if (draftDashboard) {
+    //   if (!isExcluded) {
+    //     resetDraftDashboard();
+    //     console.log("draftPanel 삭제함");
+    //   }
+    // }
+  }, [pathname, tempPanel]);
 
   return (
     <div className="flex flex-col h-screen">
