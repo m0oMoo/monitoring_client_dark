@@ -62,6 +62,7 @@ const DetailDashboard = () => {
   const [alertMessage, setAlertMessage] = useState<string>("");
   const [gridLayout, setGridLayout] = useState<Layout[]>([]);
   const [panels, setPanels] = useState<any[]>([]);
+  const [deletedPanelIds, setDeletedPanelIds] = useState<string[]>([]);
 
   const layouts = useMemo(() => ({ lg: gridLayout }), [gridLayout]);
 
@@ -179,56 +180,70 @@ const DetailDashboard = () => {
     setSelectedDashboard(null);
   };
 
+  // 항상 병합 기준: dashboard.pannels + panels + tempPanel (가장 우선순위)
   useEffect(() => {
     if (!dashboard) return;
 
-    if (isEditing) return; // 👈 편집 모드일 때는 패널 상태 초기화 방지
+    const savedPanels = dashboard.pannels ?? [];
+    const panelMap = new Map<string, any>();
 
-    const basePanels = dashboard.pannels ?? [];
+    savedPanels.forEach((p) => {
+      if (!deletedPanelIds.includes(p.pannelId)) {
+        panelMap.set(p.pannelId, p);
+      }
+    });
 
-    const mergedPanels =
-      tempPanel && tempPanelTargetDashboardId === dashboardId
-        ? (() => {
-            const isEdit = basePanels.some(
-              (p) => p.pannelId === tempPanel.pannelId
-            );
-            return isEdit
-              ? basePanels.map((p) =>
-                  p.pannelId === tempPanel.pannelId ? tempPanel : p
-                )
-              : [...basePanels, tempPanel];
-          })()
-        : basePanels;
+    panels.forEach((p) => {
+      if (!deletedPanelIds.includes(p.pannelId)) {
+        panelMap.set(p.pannelId, p);
+      }
+    });
 
-    setPanels(mergedPanels);
+    if (
+      tempPanel &&
+      tempPanelTargetDashboardId === dashboardId &&
+      !deletedPanelIds.includes(tempPanel.pannelId)
+    ) {
+      panelMap.set(tempPanel.pannelId, tempPanel);
+    }
 
-    const newLayout = mergedPanels.map((panel) => ({
-      i: panel.pannelId,
-      x: panel.gridPos.x,
-      y: panel.gridPos.y,
-      w: panel.gridPos.w,
-      h: panel.gridPos.h,
-      minW: panel.pannelType === "widget" ? MIN_WIDGET_WIDTH : MIN_CHART_WIDTH,
-      minH:
-        panel.pannelType === "widget" ? MIN_WIDGET_HEIGHT : MIN_CHART_HEIGHT,
-    }));
+    const mergedPanels = Array.from(panelMap.values());
 
-    setGridLayout(newLayout);
+    const isEqual = JSON.stringify(mergedPanels) === JSON.stringify(panels);
+    if (!isEqual) {
+      setPanels(mergedPanels);
+      setGridLayout(
+        mergedPanels.map((panel) => ({
+          i: panel.pannelId,
+          x: panel.gridPos.x,
+          y: panel.gridPos.y,
+          w: panel.gridPos.w,
+          h: panel.gridPos.h,
+          minW:
+            panel.pannelType === "widget" ? MIN_WIDGET_WIDTH : MIN_CHART_WIDTH,
+          minH:
+            panel.pannelType === "widget"
+              ? MIN_WIDGET_HEIGHT
+              : MIN_CHART_HEIGHT,
+        }))
+      );
+    }
   }, [
     dashboard?.id,
     JSON.stringify(dashboard?.pannels),
     JSON.stringify(tempPanel),
     tempPanelTargetDashboardId,
     dashboardId,
-    isEditing, // 👈 의존성에도 추가!
+    JSON.stringify(panels),
+    JSON.stringify(deletedPanelIds), // ⬅ 추가!
   ]);
 
   const handleCancel = () => {
-    clearTempPanel(); // 💡 tempPanel 수동 제거
+    clearTempPanel();
+    setDeletedPanelIds([]); // 💥 삭제된 것들 복구!
 
     if (dashboard) {
       setPanels(dashboard.pannels);
-
       const originalLayout = dashboard.pannels.map((panel) => ({
         i: panel.pannelId,
         x: panel.gridPos.x,
@@ -248,24 +263,26 @@ const DetailDashboard = () => {
   };
 
   const handlePanelDelete = (pannelId: string) => {
-    if (isEditing) {
-      // Edit 모드에서만 삭제 가능
-      // 패널 리스트에서만 삭제 (실제 저장은 Save 버튼 클릭 시)
-      const filteredPanels = panels.filter(
-        (panel) => panel.pannelId !== pannelId
-      );
-      setPanels(filteredPanels);
-
-      // 레이아웃에서도 삭제
-      const filteredLayout = gridLayout.filter((item) => item.i !== pannelId);
-      setGridLayout(filteredLayout);
-
-      setAlertMessage(
-        "패널이 삭제되었습니다. 저장하려면 Save 버튼을 클릭하세요."
-      );
-    } else {
+    if (!isEditing) {
       setAlertMessage("편집 모드에서만 패널을 삭제할 수 있습니다.");
+      return;
     }
+
+    if (tempPanel && tempPanel.pannelId === pannelId) {
+      clearTempPanel();
+      setPanels((prev) => prev.filter((p) => p.pannelId !== pannelId));
+      setGridLayout((prev) => prev.filter((l) => l.i !== pannelId));
+      setAlertMessage("임시 패널이 삭제되었습니다.");
+      return;
+    }
+
+    // 👉 삭제된 패널 ID 기억
+    setDeletedPanelIds((prev) => [...prev, pannelId]);
+
+    // 👉 UI에서도 제거
+    setPanels((prev) => prev.filter((p) => p.pannelId !== pannelId));
+    setGridLayout((prev) => prev.filter((l) => l.i !== pannelId));
+    setAlertMessage("패널이 삭제되었습니다. 저장하려면 Save를 누르세요.");
   };
 
   // 패널 수정으로 이동하는 함수 (라우팅)

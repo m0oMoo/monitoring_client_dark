@@ -87,7 +87,8 @@ const PannelSection = () => {
 
   const { addPannelToDashboard, updatePannelInDashboard, getDashboardById } =
     useDashboardStore2();
-  const { draftDashboard, addPannelToDraft } = useDraftDashboardStore();
+  const { draftDashboard, addPannelToDraft, resetDraftDashboard } =
+    useDraftDashboardStore();
   const { tempPanel, tempPanelTargetDashboardId } = useTempPanelStore();
 
   const dashboard = getDashboardById(dashboardId);
@@ -217,29 +218,31 @@ const PannelSection = () => {
       addPannelToDraft(newPannel, isEditing);
       router.push(`/detail2?id=${draftDashboard.id}`);
     } else if (dashboardId) {
+      resetDraftDashboard();
       // 기존 대시보드 → 저장 대신 임시로 보관
       setTempPanel(newPannel, dashboardId);
       router.push(`/detail2?id=${dashboardId}`);
     }
 
-    // // draft 대시보드에 패널 추가
-    // if (draftDashboard) {
-    //   addPannelToDraft(newPannel, isEditing);
-    //   // draft 대시보드로 이동
-    //   router.push(`/detail2?id=${draftDashboard.id}`);
-    // }
-    // // 기존 대시보드가 있을 경우
-    // else if (dashboardId) {
-    //   if (isEditing) {
-    //     // 기존 대시보드 패널 수정
-    //     updatePannelInDashboard(dashboardId, newPannel);
-    //   } else {
-    //     // 기존 대시보드에 새 패널 추가
-    //     addPannelToDashboard(dashboardId, newPannel);
+    // draft 대시보드에 패널 추가
+    //   if (draftDashboard?.id === dashboardId) {
+    //     addPannelToDraft(newPannel, isEditing);
+    //     // draft 대시보드로 이동
+    //     router.push(`/detail2?id=${draftDashboard.id}`);
     //   }
-    //   // 기존 대시보드로 이동
-    //   router.push(`/detail2?id=${dashboardId}`);
-    // }
+    //   // 기존 대시보드가 있을 경우
+    //   else if (dashboardId) {
+    //     resetDraftDashboard();
+    //     if (isEditing) {
+    //       // 기존 대시보드 패널 수정
+    //       updatePannelInDashboard(dashboardId, newPannel);
+    //     } else {
+    //       // 기존 대시보드에 새 패널 추가
+    //       addPannelToDashboard(dashboardId, newPannel);
+    //     }
+    //     // 기존 대시보드로 이동
+    //     router.push(`/detail2?id=${dashboardId}`);
+    //   }
   };
 
   const handleCancel = () => {

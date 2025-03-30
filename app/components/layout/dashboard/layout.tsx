@@ -32,8 +32,6 @@ const DashboardLayout = ({
     (state) => state.editStates[dashboardId] ?? false
   );
 
-  console.log("편집 상태>>>", isEdit);
-
   // 시간 초기화
   useEffect(() => {
     const now = new Date();
