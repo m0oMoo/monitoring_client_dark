@@ -45,10 +45,12 @@ const DetailDashboard = () => {
   const { draftDashboard } = useDraftDashboardStore();
   const { title, description } = useDashboardStateStore();
   const {
-    tempPanel,
+    tempPanels,
+    targetDashboardId,
+    setTempPanels,
     setTempPanel,
-    tempPanelTargetDashboardId,
-    clearTempPanel,
+    updateTempPanelLayout,
+    clearTempPanels,
   } = useTempPanelStore();
 
   const [dashboardId, setDashboardId] = useState<string>(initialId || "1");
@@ -89,33 +91,28 @@ const DetailDashboard = () => {
   const handleLayoutChange = (layout: Layout[]) => {
     const updatedPanels = panels.map((panel) => {
       const updatedLayout = layout.find((item) => item.i === panel.pannelId);
-      if (updatedLayout) {
-        const updatedPanel = {
-          ...panel,
-          gridPos: {
-            x: updatedLayout.x,
-            y: updatedLayout.y,
-            w: updatedLayout.w,
-            h: updatedLayout.h,
-          },
-        };
+      if (!updatedLayout) return panel;
 
-        // tempPanel도 업데이트
-        if (
-          tempPanel &&
-          tempPanelTargetDashboardId === dashboardId &&
-          panel.pannelId === tempPanel.pannelId
-        ) {
-          setTempPanel(updatedPanel, dashboardId); // store 업데이트
-        }
+      const updatedPanel = {
+        ...panel,
+        gridPos: {
+          x: updatedLayout.x,
+          y: updatedLayout.y,
+          w: updatedLayout.w,
+          h: updatedLayout.h,
+        },
+      };
 
-        return updatedPanel;
+      // ✅ 임시 패널이면 store에도 반영
+      if (targetDashboardId === dashboardId && tempPanels[panel.pannelId]) {
+        updateTempPanelLayout(panel.pannelId, updatedPanel.gridPos);
       }
-      return panel;
+
+      return updatedPanel; // ✅ 기존 패널도 반영됨
     });
 
-    setPanels(updatedPanels);
-    setGridLayout(layout);
+    setPanels(updatedPanels); // ✅ 모든 패널 위치 반영
+    setGridLayout(layout); // ✅ 레이아웃도 갱신
   };
 
   const handleSaveDashboard = () => {
@@ -128,11 +125,19 @@ const DetailDashboard = () => {
 
     // tempPanel 병합 처리
     let finalPanels = [...panels];
-    if (tempPanel && tempPanelTargetDashboardId === dashboardId) {
-      const isEdit = panels.some((p) => p.pannelId === tempPanel.pannelId);
-      finalPanels = isEdit
-        ? panels.map((p) => (p.pannelId === tempPanel.pannelId ? tempPanel : p))
-        : [...panels, tempPanel];
+
+    // tempPanels 병합
+    if (targetDashboardId === dashboardId) {
+      Object.entries(tempPanels).forEach(([pannelId, tempPanel]) => {
+        const isEdit = finalPanels.some((p) => p.pannelId === pannelId);
+        if (isEdit) {
+          finalPanels = finalPanels.map((p) =>
+            p.pannelId === pannelId ? tempPanel : p
+          );
+        } else {
+          finalPanels.push(tempPanel);
+        }
+      });
     }
 
     const updatedDashboard: Dashboard = {
@@ -155,7 +160,7 @@ const DetailDashboard = () => {
       setAlertMessage("대시보드가 저장되었습니다.");
     }
 
-    clearTempPanel(); // 💥 저장 후 임시 저장 제거
+    clearTempPanels(); // 💥 저장 후 임시 저장 제거
   };
 
   const handleEditClick = () => {
@@ -187,60 +192,59 @@ const DetailDashboard = () => {
     const savedPanels = dashboard.pannels ?? [];
     const panelMap = new Map<string, any>();
 
+    // 1. 기존 대시보드 패널 등록
     savedPanels.forEach((p) => {
       if (!deletedPanelIds.includes(p.pannelId)) {
         panelMap.set(p.pannelId, p);
       }
     });
 
+    // 2. panels에 있는 위치 정보 우선 적용
     panels.forEach((p) => {
       if (!deletedPanelIds.includes(p.pannelId)) {
-        panelMap.set(p.pannelId, p);
+        panelMap.set(p.pannelId, p); // 💥 유저가 드래그한 최신 상태 우선 적용!
       }
     });
 
-    if (
-      tempPanel &&
-      tempPanelTargetDashboardId === dashboardId &&
-      !deletedPanelIds.includes(tempPanel.pannelId)
-    ) {
-      panelMap.set(tempPanel.pannelId, tempPanel);
+    // 3. tempPanels 병합 (최종 우선순위)
+    if (targetDashboardId === dashboardId) {
+      Object.entries(tempPanels).forEach(([pannelId, tempPanel]) => {
+        if (!deletedPanelIds.includes(pannelId)) {
+          panelMap.set(pannelId, tempPanel);
+        }
+      });
     }
 
     const mergedPanels = Array.from(panelMap.values());
 
-    const isEqual = JSON.stringify(mergedPanels) === JSON.stringify(panels);
-    if (!isEqual) {
-      setPanels(mergedPanels);
-      setGridLayout(
-        mergedPanels.map((panel) => ({
-          i: panel.pannelId,
-          x: panel.gridPos.x,
-          y: panel.gridPos.y,
-          w: panel.gridPos.w,
-          h: panel.gridPos.h,
-          minW:
-            panel.pannelType === "widget" ? MIN_WIDGET_WIDTH : MIN_CHART_WIDTH,
-          minH:
-            panel.pannelType === "widget"
-              ? MIN_WIDGET_HEIGHT
-              : MIN_CHART_HEIGHT,
-        }))
-      );
-    }
+    // 항상 반영
+    setPanels(mergedPanels);
+    setGridLayout(
+      mergedPanels.map((panel) => ({
+        i: panel.pannelId,
+        x: panel.gridPos.x,
+        y: panel.gridPos.y,
+        w: panel.gridPos.w,
+        h: panel.gridPos.h,
+        minW:
+          panel.pannelType === "widget" ? MIN_WIDGET_WIDTH : MIN_CHART_WIDTH,
+        minH:
+          panel.pannelType === "widget" ? MIN_WIDGET_HEIGHT : MIN_CHART_HEIGHT,
+      }))
+    );
   }, [
     dashboard?.id,
     JSON.stringify(dashboard?.pannels),
-    JSON.stringify(tempPanel),
-    tempPanelTargetDashboardId,
+    JSON.stringify(tempPanels),
+    targetDashboardId,
     dashboardId,
     JSON.stringify(panels),
-    JSON.stringify(deletedPanelIds), // ⬅ 추가!
+    JSON.stringify(deletedPanelIds),
   ]);
 
   const handleCancel = () => {
-    clearTempPanel();
-    setDeletedPanelIds([]); // 💥 삭제된 것들 복구!
+    clearTempPanels();
+    setDeletedPanelIds([]);
 
     if (dashboard) {
       setPanels(dashboard.pannels);
@@ -268,18 +272,19 @@ const DetailDashboard = () => {
       return;
     }
 
-    if (tempPanel && tempPanel.pannelId === pannelId) {
-      clearTempPanel();
+    // 임시 패널 삭제 (다중 구조)
+    if (tempPanels[pannelId]) {
+      const updated = { ...tempPanels };
+      delete updated[pannelId];
+      setTempPanels(updated); // ✅ 새 함수 또는 store의 setter 사용
       setPanels((prev) => prev.filter((p) => p.pannelId !== pannelId));
       setGridLayout((prev) => prev.filter((l) => l.i !== pannelId));
       setAlertMessage("임시 패널이 삭제되었습니다.");
       return;
     }
 
-    // 👉 삭제된 패널 ID 기억
+    // 기존 패널 삭제
     setDeletedPanelIds((prev) => [...prev, pannelId]);
-
-    // 👉 UI에서도 제거
     setPanels((prev) => prev.filter((p) => p.pannelId !== pannelId));
     setGridLayout((prev) => prev.filter((l) => l.i !== pannelId));
     setAlertMessage("패널이 삭제되었습니다. 저장하려면 Save를 누르세요.");

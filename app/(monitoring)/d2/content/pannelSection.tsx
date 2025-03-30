@@ -35,7 +35,6 @@ const PannelSection = () => {
   const dashboardId = params.get("id") || "1";
   const pannelId = params.get("pannelId") || undefined;
 
-  const { setTempPanel } = useTempPanelStore();
   const { selectedSection, setSelectedSection } = useSelectedSection();
   const {
     datasets,
@@ -89,7 +88,7 @@ const PannelSection = () => {
     useDashboardStore2();
   const { draftDashboard, addPannelToDraft, resetDraftDashboard } =
     useDraftDashboardStore();
-  const { tempPanel, tempPanelTargetDashboardId } = useTempPanelStore();
+  const { setTempPanel, tempPanels, targetDashboardId } = useTempPanelStore();
 
   const dashboard = getDashboardById(dashboardId);
 
@@ -100,11 +99,10 @@ const PannelSection = () => {
     : null;
 
   // tempPanel 우선 처리
+
   const targetPannel =
-    tempPanel &&
-    tempPanelTargetDashboardId === dashboardId &&
-    tempPanel.pannelId === pannelId
-      ? tempPanel
+    pannelId && targetDashboardId === dashboardId && tempPanels[pannelId]
+      ? tempPanels[pannelId]
       : existingPannel;
 
   // 기존 패널 수정 시, context에 값 세팅
