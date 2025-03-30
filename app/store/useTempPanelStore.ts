@@ -3,10 +3,15 @@ import { persist } from "zustand/middleware";
 import { DashboardPannel } from "@/types/dashboard";
 
 interface TempPanelStore {
-  tempPanel: DashboardPannel | null;
-  tempPanelTargetDashboardId: string | null;
+  tempPanels: Record<string, DashboardPannel>;
+  targetDashboardId: string | null;
   setTempPanel: (panel: DashboardPannel, dashboardId: string) => void;
-  clearTempPanel: () => void;
+  setTempPanels: (panels: Record<string, DashboardPannel>) => void; // ✅ 추가!
+  updateTempPanelLayout: (
+    pannelId: string,
+    gridPos: DashboardPannel["gridPos"]
+  ) => void;
+  clearTempPanels: () => void;
 }
 
 /**
@@ -14,16 +19,37 @@ interface TempPanelStore {
  */
 export const useTempPanelStore = create<TempPanelStore>()(
   persist(
-    (set) => ({
-      tempPanel: null,
-      tempPanelTargetDashboardId: null,
-      setTempPanel: (panel, dashboardId) =>
-        set({ tempPanel: panel, tempPanelTargetDashboardId: dashboardId }),
-      clearTempPanel: () =>
-        set({ tempPanel: null, tempPanelTargetDashboardId: null }),
+    (set, get) => ({
+      tempPanels: {},
+      targetDashboardId: null,
+      setTempPanel: (panel, dashboardId) => {
+        const prev = get().tempPanels;
+        set({
+          tempPanels: {
+            ...prev,
+            [panel.pannelId]: panel,
+          },
+          targetDashboardId: dashboardId,
+        });
+      },
+      setTempPanels: (panels) => set({ tempPanels: panels }),
+      updateTempPanelLayout: (pannelId, gridPos) => {
+        const prev = get().tempPanels;
+        if (!prev[pannelId]) return;
+        set({
+          tempPanels: {
+            ...prev,
+            [pannelId]: {
+              ...prev[pannelId],
+              gridPos,
+            },
+          },
+        });
+      },
+      clearTempPanels: () => set({ tempPanels: {}, targetDashboardId: null }),
     }),
     {
-      name: "temp-panel-storage",
+      name: "temp-panels-storage",
     }
   )
 );
