@@ -210,7 +210,6 @@ const DetailDashboard = () => {
   return (
     <div className="bg-modern-bg min-h-[calc(100vh-80px)]">
       <DashboardLayout
-        isEdit={!isEditing}
         onCreateClick={() => router.push(`/d2?id=${dashboardId}`)}
         onGridChange={() => {}}
         modifiable={true}
