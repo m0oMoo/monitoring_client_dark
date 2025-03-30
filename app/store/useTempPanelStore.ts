@@ -6,7 +6,7 @@ interface TempPanelStore {
   tempPanels: Record<string, DashboardPannel>;
   targetDashboardId: string | null;
   setTempPanel: (panel: DashboardPannel, dashboardId: string) => void;
-  setTempPanels: (panels: Record<string, DashboardPannel>) => void; // ✅ 추가!
+  setTempPanels: (panels: Record<string, DashboardPannel>) => void;
   updateTempPanelLayout: (
     pannelId: string,
     gridPos: DashboardPannel["gridPos"]
@@ -22,6 +22,7 @@ export const useTempPanelStore = create<TempPanelStore>()(
     (set, get) => ({
       tempPanels: {},
       targetDashboardId: null,
+
       setTempPanel: (panel, dashboardId) => {
         const prev = get().tempPanels;
         set({
@@ -32,7 +33,14 @@ export const useTempPanelStore = create<TempPanelStore>()(
           targetDashboardId: dashboardId,
         });
       },
-      setTempPanels: (panels) => set({ tempPanels: panels }),
+
+      setTempPanels: (panels) =>
+        set({
+          tempPanels: panels,
+          targetDashboardId:
+            Object.keys(panels).length === 0 ? null : get().targetDashboardId,
+        }),
+
       updateTempPanelLayout: (pannelId, gridPos) => {
         const prev = get().tempPanels;
         if (!prev[pannelId]) return;
@@ -46,6 +54,7 @@ export const useTempPanelStore = create<TempPanelStore>()(
           },
         });
       },
+
       clearTempPanels: () => set({ tempPanels: {}, targetDashboardId: null }),
     }),
     {
