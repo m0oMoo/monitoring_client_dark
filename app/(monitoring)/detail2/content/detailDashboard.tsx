@@ -106,13 +106,16 @@ const DetailDashboard = () => {
       // ✅ 임시 패널이면 store에도 반영
       if (targetDashboardId === dashboardId && tempPanels[panel.pannelId]) {
         updateTempPanelLayout(panel.pannelId, updatedPanel.gridPos);
+      } else if (targetDashboardId === dashboardId) {
+        // ✅ 기존 패널이지만 위치만 변경한 경우에도 store에 등록
+        setTempPanel(updatedPanel, dashboardId);
       }
 
-      return updatedPanel; // ✅ 기존 패널도 반영됨
+      return updatedPanel;
     });
 
-    setPanels(updatedPanels); // ✅ 모든 패널 위치 반영
-    setGridLayout(layout); // ✅ 레이아웃도 갱신
+    setPanels(updatedPanels);
+    setGridLayout(layout);
   };
 
   const handleSaveDashboard = () => {
@@ -186,27 +189,32 @@ const DetailDashboard = () => {
   };
 
   // 항상 병합 기준: dashboard.pannels + panels + tempPanel (가장 우선순위)
+  type PanelMapValue = any; // 필요 시 타입 정리 가능
   useEffect(() => {
     if (!dashboard) return;
 
     const savedPanels = dashboard.pannels ?? [];
-    const panelMap = new Map<string, any>();
+    const panelMap = new Map<string, PanelMapValue>();
 
-    // 1. 기존 대시보드 패널 등록
+    // 1. dashboard에 저장된 패널
     savedPanels.forEach((p) => {
       if (!deletedPanelIds.includes(p.pannelId)) {
         panelMap.set(p.pannelId, p);
       }
     });
 
-    // 2. panels에 있는 위치 정보 우선 적용
+    // 2. panels 상태값 (위치 최신화 반영)
     panels.forEach((p) => {
       if (!deletedPanelIds.includes(p.pannelId)) {
-        panelMap.set(p.pannelId, p); // 💥 유저가 드래그한 최신 상태 우선 적용!
+        const prev = panelMap.get(p.pannelId);
+        panelMap.set(p.pannelId, {
+          ...(prev || p),
+          gridPos: p.gridPos, // 위치 최신 반영
+        });
       }
     });
 
-    // 3. tempPanels 병합 (최종 우선순위)
+    // 3. tempPanels는 최종적으로 덮어쓰기 (가장 우선순위)
     if (targetDashboardId === dashboardId) {
       Object.entries(tempPanels).forEach(([pannelId, tempPanel]) => {
         if (!deletedPanelIds.includes(pannelId)) {
@@ -216,8 +224,6 @@ const DetailDashboard = () => {
     }
 
     const mergedPanels = Array.from(panelMap.values());
-
-    // 항상 반영
     setPanels(mergedPanels);
     setGridLayout(
       mergedPanels.map((panel) => ({
@@ -272,21 +278,37 @@ const DetailDashboard = () => {
       return;
     }
 
-    // 임시 패널 삭제 (다중 구조)
-    if (tempPanels[pannelId]) {
+    const newPanels = panels.filter((p) => p.pannelId !== pannelId);
+    const newLayout = gridLayout.filter((l) => l.i !== pannelId);
+
+    const isTempPanel = tempPanels[pannelId];
+    const isInOriginalDashboard =
+      dashboard?.pannels.some((p) => p.pannelId === pannelId) ?? false;
+
+    // ✅ tempPanel인데, 원래 대시보드에는 없는 완전 신규 → 임시 패널 삭제
+    if (isTempPanel && !isInOriginalDashboard) {
       const updated = { ...tempPanels };
       delete updated[pannelId];
-      setTempPanels(updated); // ✅ 새 함수 또는 store의 setter 사용
-      setPanels((prev) => prev.filter((p) => p.pannelId !== pannelId));
-      setGridLayout((prev) => prev.filter((l) => l.i !== pannelId));
+
+      setTempPanels(updated);
+      setPanels(newPanels);
+      setGridLayout(newLayout);
       setAlertMessage("임시 패널이 삭제되었습니다.");
       return;
     }
 
-    // 기존 패널 삭제
+    // ✅ 기존 대시보드에 있던 패널 삭제
     setDeletedPanelIds((prev) => [...prev, pannelId]);
-    setPanels((prev) => prev.filter((p) => p.pannelId !== pannelId));
-    setGridLayout((prev) => prev.filter((l) => l.i !== pannelId));
+
+    // ✅ 임시 저장에 있으면 같이 제거 (위치만 바꿔서 들어간 경우)
+    if (isTempPanel) {
+      const updated = { ...tempPanels };
+      delete updated[pannelId];
+      setTempPanels(updated);
+    }
+
+    setPanels(newPanels);
+    setGridLayout(newLayout);
     setAlertMessage("패널이 삭제되었습니다. 저장하려면 Save를 누르세요.");
   };
 
