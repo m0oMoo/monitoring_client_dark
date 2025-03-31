@@ -135,9 +135,9 @@ const DataBinding = () => {
   return (
     <div
       className="bg-modern-bg border-l border-0.5 no-scrollbar border-modern-border
-    pt-[44px] pl-6 w-[300px] h-[100vh] overflow-y-auto"
+    pl-6 py-8 w-[300px] h-[100vh] overflow-y-auto"
     >
-      <div className="w-full flex flex-col pt-10 pb-10">
+      <div className="w-full flex flex-col">
         <h2 className="text-lg font-semibold mb-4 text-modern-text">
           Data Binding
         </h2>
