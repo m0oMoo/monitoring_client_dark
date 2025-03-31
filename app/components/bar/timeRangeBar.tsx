@@ -7,6 +7,7 @@ import { useSnapshotStore } from "@/store/useSnapshotStore";
 import { Camera } from "lucide-react";
 import SnapshotModal from "@/components/modal/snapshotModal";
 import Alert from "../alert/alert";
+import { useEditStateStore } from "@/store/useEditStateStore"; // Add this import
 
 interface TimeRangeBarProps {
   from: string | null;
@@ -18,6 +19,19 @@ interface TimeRangeBarProps {
   className?: string;
 }
 
+/**
+ * TimeRangeBar 컴포넌트는 시간 범위 선택 및 새로 고침 주기 설정
+ *
+ * @param from - 시작 시간 (ISO 형식 문자열 또는 null)
+ * @param to - 종료 시간 (ISO 형식 문자열 또는 null)
+ * @param lastUpdated - 마지막 업데이트 시간 (ISO 형식 문자열 또는 null)
+ * @param refreshTime - 데이터 새로 고침 주기 (초 단위로 숫자 또는 "autoType")
+ * @param onChange - 시간 범위 변경 시 호출되는 콜백 함수 (from 또는 to 값 변경)
+ * @param onRefreshChange - 새로 고침 주기 변경 시 호출되는 콜백 함수 (refreshTime 변경)
+ * @param className - 추가적인 클래스명을 지정할 수 있는 선택적 prop (기본값은 없음)
+ *
+ * @returns JSX 요소로 구성된 TimeRangeBar 컴포넌트
+ */
 const TimeRangeBar: React.FC<TimeRangeBarProps> = ({
   from,
   to,
@@ -32,6 +46,7 @@ const TimeRangeBar: React.FC<TimeRangeBarProps> = ({
   const { draftDashboard } = useDraftDashboardStore();
   const { getDashboardById } = useDashboardStore2();
   const { createSnapshot } = useSnapshotStore();
+  const { editStates } = useEditStateStore();
 
   const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
   const [alertMessage, setAlertMessage] = useState<string>("");
@@ -42,6 +57,7 @@ const TimeRangeBar: React.FC<TimeRangeBarProps> = ({
       : getDashboardById(dashboardId);
 
   const isDraft = dashboardId === draftDashboard?.id;
+  const isEditing = editStates[dashboardId] || false;
 
   const handleSnapshotSave = (name: string, description: string) => {
     if (!currentDashboard) return;
@@ -90,7 +106,8 @@ const TimeRangeBar: React.FC<TimeRangeBarProps> = ({
           <option value={30}>30s</option>
         </select>
 
-        {!isDraft && (
+        {/* 새로운 대시보드를 생성한 경우 & 편집 상태인 경우 스냅샷 버튼 hidden */}
+        {!isDraft && !isEditing && (
           <button
             onClick={() => setIsOpenModal(true)}
             className="ml-2 p-1 px-1.5 border border-modern-border hover:bg-modern-hover"
