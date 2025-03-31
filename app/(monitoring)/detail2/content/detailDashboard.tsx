@@ -26,6 +26,7 @@ import DashboardLayout from "@/components/layout/dashboard/layout";
 import { useDashboardStateStore } from "@/store/useDashboardStateStore";
 import { useTempPanelStore } from "@/store/useTempPanelStore";
 import { useEditStateStore } from "@/store/useEditStateStore";
+import CloneModal from "@/components/modal/cloneModal";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -103,11 +104,11 @@ const DetailDashboard = () => {
         },
       };
 
-      // ✅ 임시 패널이면 store에도 반영
+      // 임시 패널이면 store에도 반영
       if (targetDashboardId === dashboardId && tempPanels[panel.pannelId]) {
         updateTempPanelLayout(panel.pannelId, updatedPanel.gridPos);
       } else if (targetDashboardId === dashboardId) {
-        // ✅ 기존 패널이지만 위치만 변경한 경우에도 store에 등록
+        // 기존 패널이지만 위치만 변경한 경우에도 store에 등록
         setTempPanel(updatedPanel, dashboardId);
       }
 
@@ -285,7 +286,7 @@ const DetailDashboard = () => {
     const isInOriginalDashboard =
       dashboard?.pannels.some((p) => p.pannelId === pannelId) ?? false;
 
-    // ✅ tempPanel인데, 원래 대시보드에는 없는 완전 신규 → 임시 패널 삭제
+    // tempPanel인데, 원래 대시보드에는 없는 완전 신규 → 임시 패널 삭제
     if (isTempPanel && !isInOriginalDashboard) {
       const updated = { ...tempPanels };
       delete updated[pannelId];
@@ -297,10 +298,10 @@ const DetailDashboard = () => {
       return;
     }
 
-    // ✅ 기존 대시보드에 있던 패널 삭제
+    // 기존 대시보드에 있던 패널 삭제
     setDeletedPanelIds((prev) => [...prev, pannelId]);
 
-    // ✅ 임시 저장에 있으면 같이 제거 (위치만 바꿔서 들어간 경우)
+    // 임시 저장에 있으면 같이 제거 (위치만 바꿔서 들어간 경우)
     if (isTempPanel) {
       const updated = { ...tempPanels };
       delete updated[pannelId];
@@ -453,49 +454,15 @@ const DetailDashboard = () => {
       </DashboardLayout>
 
       {isCloneModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-[100]">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-            <h2 className="text-lg font-bold mb-4">대시보드 선택</h2>
-            <ul>
-              {dashboardList.map((dashboard) => (
-                <li
-                  key={dashboard.id}
-                  onClick={() => setSelectedDashboard(dashboard.id)}
-                  className={`cursor-pointer p-2 rounded ${
-                    selectedDashboard === dashboard.id
-                      ? "bg-modern-btn text-white"
-                      : "hover:bg-gray-100"
-                  }`}
-                >
-                  {dashboard.label}
-                </li>
-              ))}
-            </ul>
-            <div className="flex justify-end mt-4">
-              <button
-                onClick={() => {
-                  setIsCloneModalOpen(false);
-                  setSelectedDashboard(null);
-                }}
-                className="mr-2 px-4 py-2 bg-gray-200 rounded text-md2"
-              >
-                취소
-              </button>
-              <button
-                onClick={confirmClone}
-                disabled={!selectedDashboard}
-                className={`px-4 py-2 rounded text-md2 text-white ${
-                  selectedDashboard
-                    ? "bg-modern-btn"
-                    : "bg-modern-btn opacity-80"
-                }`}
-              >
-                확인
-              </button>
-            </div>
-          </div>
-        </div>
+        <CloneModal
+          dashboardList={dashboardList}
+          selectedDashboard={selectedDashboard}
+          setSelectedDashboard={setSelectedDashboard}
+          setIsCloneModalOpen={setIsCloneModalOpen}
+          confirmClone={confirmClone}
+        />
       )}
+
       {alertMessage && <Alert message={alertMessage} />}
     </div>
   );
