@@ -6,31 +6,35 @@ import LeftMenu from "./leftMenu";
 import { usePathname } from "next/navigation";
 import { useTempPanelStore } from "@/store/useTempPanelStore";
 import { useDraftDashboardStore } from "@/store/useDraftDashboardStore";
+import { useEditStateStore } from "@/store/useEditStateStore";
 
 const Layout = ({ children }: { children: ReactNode }) => {
   const pathname = usePathname();
 
   const [menuOpen, setMenuOpen] = useState<boolean>(true);
-  const { tempPanel, clearTempPanel } = useTempPanelStore();
+  const { tempPanels, clearTempPanels } = useTempPanelStore();
   const { draftDashboard, resetDraftDashboard } = useDraftDashboardStore();
+  const { resetAllEditStates } = useEditStateStore();
 
   useEffect(() => {
     const path = pathname;
     const isExcluded = path.includes("/d2") || path.includes("/detail2");
 
-    if (tempPanel) {
-      if (!isExcluded) {
+    if (!isExcluded) {
+      if (tempPanels) {
         console.log("tempPanel 삭제함");
-        clearTempPanel();
+        clearTempPanels();
       }
+
+      resetAllEditStates();
     }
+
+    // If needed, cleanup code for draftDashboard
     // if (draftDashboard) {
-    //   if (!isExcluded) {
-    //     resetDraftDashboard();
-    //     console.log("draftPanel 삭제함");
-    //   }
+    //   resetDraftDashboard();
+    //   console.log("draftPanel 삭제함");
     // }
-  }, [pathname, tempPanel]);
+  }, [pathname]);
 
   return (
     <div className="flex flex-col h-screen">
