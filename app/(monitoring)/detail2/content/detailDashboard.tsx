@@ -79,6 +79,7 @@ const DetailDashboard = () => {
     // draftDashboard가 있을 때만 설정
     if (dashboardId === draftDashboard?.id) {
       setDashboard(draftDashboard); // 기존 대시보드 로드
+      setEditState(draftDashboard?.id, true);
     } else {
       const fetchedDashboard = getDashboardById(dashboardId);
       if (fetchedDashboard) {
