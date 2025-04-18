@@ -64,10 +64,10 @@ const AddTabModal = ({
 
   return (
     isOpen && (
-      <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex justify-center items-center z-50">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
         <div className="bg-[#2E2E2E] p-6 w-96 border border-[#4E4E4E]">
-          <h2 className="text-lg text-modern-text mb-4">
-            {editingIndex !== null ? "대시보드 수정" : "새 대시보드 추가"}
+          <h2 className="mb-4 text-lg text-modern-text">
+            {editingIndex !== null ? "Edit Dashboard" : "Add New Dashboard"}
           </h2>
           <input
             type="text"
@@ -75,14 +75,14 @@ const AddTabModal = ({
             onChange={(e) => setNewTabName(e.target.value)}
             className="focus:outline focus:outline-modern-border p-2 mb-4 w-full text-sm bg-[#3E3E3E] 
             text-[#DFDFDF] placeholder-[#707070] "
-            placeholder="탭 이름을 입력하세요"
+            placeholder="Dashboard Name"
           />
           <textarea
             value={newTabDescription}
             onChange={(e) => setNewTabDescription(e.target.value)}
             className=" p-2 mb-4 w-full text-sm focus:border-[#4E4E4E] focus:outline focus:outline-modern-border 
             bg-[#3E3E3E] text-[#DFDFDF] placeholder-[#707070]"
-            placeholder="탭 설명을 입력하세요"
+            placeholder="Dashboard Description"
           />
           <div className="flex justify-end gap-3">
             <button

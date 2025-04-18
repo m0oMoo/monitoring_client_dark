@@ -28,34 +28,36 @@ const SnapshotModal = ({ isOpen, onClose, onSave }: SnapshotModalProps) => {
 
   return (
     isOpen && (
-      <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex justify-center items-center z-50">
-        <div className="bg-[#2E2E2E] p-6 w-96 border border-[#4E4E4E]">
-          <h2 className="text-lg text-modern-text mb-4">스냅샷 저장</h2>
+      <div className="fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm flex justify-center items-center z-50">
+        <div className="bg-modern-bg p-6 w-96 border border-modern-border rounded-xl shadow-lg">
+          <h2 className="text-lg text-modern-text font-semibold mb-4">
+            스냅샷 저장
+          </h2>
 
           <input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="focus:outline focus:outline-modern-border p-2 mb-4 w-full text-sm bg-[#3E3E3E] text-[#DFDFDF] placeholder-[#707070]"
+            className="w-full text-sm p-2 mb-3 rounded-md bg-modern-bg1 text-modern-text placeholder-modern-subtext border border-modern-border focus:outline-none focus:ring-2 focus:ring-point-50 transition"
             placeholder="스냅샷 이름을 입력하세요"
           />
 
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="p-2 mb-4 w-full text-sm focus:outline focus:outline-modern-border bg-[#3E3E3E] text-[#DFDFDF] placeholder-[#707070]"
+            className="w-full text-sm p-2 mb-4 rounded-md bg-modern-bg1 text-modern-text placeholder-modern-subtext border border-modern-border focus:outline-none focus:ring-2 focus:ring-point-50 transition"
             placeholder="스냅샷 설명을 입력하세요"
           />
 
           <div className="flex justify-end gap-3">
             <button
-              className="px-3 py-1.5 bg-modern-bg text-sm text-[#CFCFCF] hover:bg-modern-bg1"
+              className="px-4 py-2 text-sm text-modern-text bg-modern-hover hover:bg-modern-bg1 rounded-md transition"
               onClick={onClose}
             >
               취소
             </button>
             <button
-              className="px-3 py-1.5 bg-modern-bg2 text-sm text-[#CFCFCF] hover:bg-modern-bg3"
+              className="px-4 py-2 text-sm text-point bg-modern-point_10 hover:bg-point_20 rounded-md transition"
               onClick={handleSubmit}
             >
               저장
