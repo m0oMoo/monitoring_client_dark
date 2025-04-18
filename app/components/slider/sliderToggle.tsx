@@ -1,3 +1,4 @@
+import { useThemeStore } from "@/store/useThemeStore";
 import React from "react";
 
 interface SliderToggleProps {
@@ -33,6 +34,16 @@ const SliderToggle: React.FC<SliderToggleProps> = ({
   step = 0.1,
   className,
 }) => {
+  const { theme } = useThemeStore();
+
+  const accentClass = {
+    modern: "accent-modern-point_20",
+    blue: "accent-blue-point_20",
+    pink: "accent-pink-point_20",
+    orange: "accent-orange-point_20",
+    ivory: "accent-ivory-point_20",
+  }[theme];
+
   return (
     <div className={`flex flex-row items-center gap-4 mt-1 ${className}`}>
       {/* 슬라이더 */}
@@ -44,8 +55,8 @@ const SliderToggle: React.FC<SliderToggleProps> = ({
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
         disabled={!enabled}
-        className="w-full h-2 bg-modern-border rounded-lg appearance-none disabled:opacity-50 
-                cursor-pointer accent-modern-point_20"
+        className={`w-full h-2 bg-modern-border rounded-lg appearance-none disabled:opacity-50 
+                cursor-pointer ${accentClass}`}
       />
       {/* 현재 값 표시 */}
       <span className="text-sm1 w-4 text-modern-text">{value.toFixed(1)}</span>
