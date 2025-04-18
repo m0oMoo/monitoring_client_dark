@@ -1,3 +1,5 @@
+import { useThemeStore } from "@/store/useThemeStore";
+
 interface ToggleButtonGroupProps<T extends string> {
   options: T[];
   selected: T;
@@ -5,20 +7,32 @@ interface ToggleButtonGroupProps<T extends string> {
   label: string;
 }
 
-/**
- *
- * @param options 버튼 옵션 배열
- * @param selected 선택된 값
- * @param onChange
- * @param label 그룹의 레이블
- * @returns
- */
 const SquareToggleBtnGroup = <T extends string>({
   options,
   selected,
   onChange,
   label,
 }: ToggleButtonGroupProps<T>) => {
+  const { theme } = useThemeStore();
+
+  // 선택된 버튼 배경 색상 (theme별)
+  const selectedBgClass = {
+    modern: "bg-modern-point_80",
+    blue: "bg-blue-point_80",
+    pink: "bg-pink-point_80",
+    orange: "bg-orange-point_80",
+    ivory: "bg-ivory-point_80",
+  }[theme];
+
+  // 선택된 버튼 텍스트 색상 (theme별)
+  const selectedTextClass = {
+    modern: "text-modern-subtext3",
+    blue: "text-blue-subtext3",
+    pink: "text-pink-subtext3",
+    orange: "text-orange-subtext3",
+    ivory: "text-ivory-subtext3",
+  }[theme];
+
   return (
     <div className="text-sm1">
       <div className="flex">
@@ -27,11 +41,11 @@ const SquareToggleBtnGroup = <T extends string>({
             <button
               key={option}
               onClick={() => onChange(option)}
-              className={`px-3.5 py-1.5 rounded-sm ${
+              className={`px-3.5 py-1.5 rounded-sm transition duration-300 ${
                 selected === option
-                  ? "bg-modern-point_80 text-modern-subtext3"
-                  : "bg-modern-text_disable text-modern-subtext"
-              } transition duration-300`}
+                  ? `${selectedBgClass} ${selectedTextClass}`
+                  : `text-modern-subtext bg-modern-text_disable`
+              }`}
             >
               {option}
             </button>
