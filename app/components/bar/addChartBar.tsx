@@ -39,7 +39,7 @@ const AddChartBar = ({
   const [isEditingTitle, setIsEditingTitle] = useState<boolean>(false);
   const [isEditingDesc, setIsEditingDesc] = useState<boolean>(false);
   const [isDescriptionVisible, setIsDescriptionVisible] =
-    useState<boolean>(true);
+    useState<boolean>(false);
 
   // 대시보드 및 패널 로딩
   useEffect(() => {
