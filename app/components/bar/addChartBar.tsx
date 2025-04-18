@@ -4,6 +4,8 @@ import { useDashboardStateStore } from "@/store/useDashboardStateStore";
 import { useDashboardStore2 } from "@/store/useDashboard2Store";
 import { useDraftDashboardStore } from "@/store/useDraftDashboardStore";
 import { Eye, EyeOff } from "lucide-react";
+import BasicBtn from "../button/borderBtn";
+import BorderBtn from "../button/basicBtn";
 
 interface AddChartBarProps {
   isEdit: boolean;
@@ -200,30 +202,14 @@ const AddChartBar = ({
         {/* 버튼들 */}
         <div className="flex flex-row gap-5">
           <div className="flex flex-row gap-2 text-sm1">
-            {isEdit && (
-              <button
-                className="hover:bg-modern-point_20 bg-modern-point_10 px-2 py-0.5 text-modern-point border-modern-point"
-                onClick={onCancelClick}
-              >
-                cancel
-              </button>
-            )}
+            {isEdit && <BasicBtn title="cancel" onClick={onCancelClick} />}
             {modifiable && (
-              <button
-                className="border hover:bg-modern-point_20 bg-modern-point_10 px-2 py-1 text-modern-point border-modern-point"
+              <BorderBtn
+                title={isEdit ? "Save" : "Edit"}
                 onClick={onEditClick}
-              >
-                {isEdit ? "Save" : "Edit"}
-              </button>
+              />
             )}
-            {isEdit && (
-              <button
-                className="border hover:bg-modern-point_20 bg-modern-point_10 px-2 py-1 text-modern-point border-modern-point"
-                onClick={onCreateClick}
-              >
-                Create
-              </button>
-            )}
+            {isEdit && <BorderBtn title="추가" onClick={onCreateClick} />}
           </div>
         </div>
       </div>
