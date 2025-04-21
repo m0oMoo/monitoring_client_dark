@@ -72,7 +72,7 @@ export default {
           point_80: "rgba(255, 143, 163, 0.8)",
         },
         orange: {
-          bg: "#2f2f2f",
+          bg: "#2c2a28",
           bg_sub: "#3A3A3A",
           point: "#f1ab41",
           point_10: "rgba(255, 167, 38, 0.1)",
@@ -83,7 +83,7 @@ export default {
           point_80: "rgba(255, 167, 38, 0.8)",
         },
         ivory: {
-          bg: "#262421",
+          bg: "#2b2825",
           bg_sub: "#3A3A3A",
           point: "#F5ECD8",
           point_10: "rgba(245, 236, 216, 0.1)",

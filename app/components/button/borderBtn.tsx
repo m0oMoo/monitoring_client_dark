@@ -6,7 +6,7 @@ interface ButtonProps {
   onClick?: (() => void) | undefined;
 }
 
-const BasicBtn: React.FC<ButtonProps> = ({ title, onClick }) => {
+const BorderBtn: React.FC<ButtonProps> = ({ title, onClick }) => {
   const { theme } = useThemeStore();
 
   const bgClass = {
@@ -43,7 +43,7 @@ const BasicBtn: React.FC<ButtonProps> = ({ title, onClick }) => {
 
   return (
     <button
-      className={`border ${hoverBgClass} ${bgClass} ${borderClass} ${textClass} px-2 py-1`}
+      className={`border ${hoverBgClass} ${bgClass} ${borderClass} ${textClass} px-2 py-1 text-sm`}
       onClick={onClick}
     >
       {title}
@@ -51,4 +51,4 @@ const BasicBtn: React.FC<ButtonProps> = ({ title, onClick }) => {
   );
 };
 
-export default BasicBtn;
+export default BorderBtn;

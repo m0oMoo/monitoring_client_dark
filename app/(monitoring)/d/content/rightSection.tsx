@@ -76,7 +76,7 @@ const RightSection = () => {
         {/* Data Binding 버튼 - selectedSection을 변경하지 않고, activeTab만 변경 */}
         <button
           onClick={() => handleSectionClick("dataBinding")}
-          className={`px-[7.5px] py-[8.5px] border-b border-modern-border ${
+          className={`px-[7.5px] py-[9.5px] border-b border-modern-border ${
             activeTab === "dataBinding"
               ? `${bgClass} text-modern-text`
               : " text-modern-text_disable"
@@ -89,7 +89,7 @@ const RightSection = () => {
         <div className="flex flex-row w-full border-b border-modern-border">
           <button
             onClick={() => handleSectionClick("chartOption")}
-            className={`w-full py-2 border-r border-modern-border ${
+            className={`w-full py-[8.8px] border-r border-modern-border ${
               selectedSectionValue === "chartOption"
                 ? `${bgClass} text-modern-text`
                 : " text-modern-text_disable"
@@ -99,7 +99,7 @@ const RightSection = () => {
           </button>
           <button
             onClick={() => handleSectionClick("widgetOption")}
-            className={`w-full py-2 ${
+            className={`w-full py-[8.8px] ${
               selectedSectionValue === "widgetOption"
                 ? `${bgClass} text-modern-text`
                 : " text-modern-text_disable"

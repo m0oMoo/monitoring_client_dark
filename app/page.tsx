@@ -9,11 +9,14 @@ import TabMenu from "@/components/menu/tabMenu";
 import SearchInput from "@/components/search/searchInput";
 import { useDashboardStore2 } from "@/store/useDashboard2Store";
 import { useDraftDashboardStore } from "@/store/useDraftDashboardStore";
+import { useThemeStore } from "./store/useThemeStore";
+import BorderBtn from "./components/button/borderBtn";
 
 export default function Home() {
   const router = useRouter();
+  const { theme } = useThemeStore();
   const { dashboardList } = useDashboardStore2();
-  const { draftDashboard, startDraftDashboard } = useDraftDashboardStore();
+  const { startDraftDashboard } = useDraftDashboardStore();
 
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [editingTabIndex, setEditingTabIndex] = useState<string | null>(null);
@@ -97,13 +100,7 @@ export default function Home() {
           >
             <Camera size={18} className="text-modern-text" /> 스냅샷 보기
           </button>
-          <button
-            onClick={handleAddDashboard}
-            className="flex bg-modern-point_10 py-1.5 px-2 text-modern-point border border-modern-point text-sm
-  hover:bg-modern-point_20 justify-self-end"
-          >
-            + 대시보드 추가
-          </button>
+          <BorderBtn title={"+ 대시보드 추가"} onClick={handleAddDashboard} />
         </div>
       </header>
 
