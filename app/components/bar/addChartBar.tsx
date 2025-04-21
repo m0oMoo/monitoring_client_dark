@@ -209,7 +209,7 @@ const AddChartBar = ({
                 onClick={onEditClick}
               />
             )}
-            {isEdit && <BorderBtn title="추가" onClick={onCreateClick} />}
+            {isEdit && <BorderBtn title="Create" onClick={onCreateClick} />}
           </div>
         </div>
       </div>
