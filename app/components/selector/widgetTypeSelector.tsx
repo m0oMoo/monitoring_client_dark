@@ -1,3 +1,4 @@
+import { useThemeStore } from "@/store/useThemeStore";
 import { Gauge, SquareStack, BarChart3, Type } from "lucide-react";
 
 type WidgetType = "stat" | "card" | "cardWithChart" | "numberOnly";
@@ -11,6 +12,16 @@ const WidgetTypeSelector: React.FC<WidgetTypeSelectorProps> = ({
   widgetType,
   setWidgetType,
 }) => {
+  const { theme } = useThemeStore();
+
+  const textClass = {
+    modern: "text-modern-point",
+    blue: "text-blue-point",
+    pink: "text-pink-point",
+    orange: "text-orange-point",
+    ivory: "text-ivory-point",
+  }[theme];
+
   return (
     <div className="mb-4">
       <div className="flex space-x-4">
@@ -19,7 +30,7 @@ const WidgetTypeSelector: React.FC<WidgetTypeSelectorProps> = ({
           onClick={() => setWidgetType("stat")}
           className={`p-2 ${
             widgetType === "stat"
-              ? "bg-modern-border2 text-modern-point" // 선택된 상태에서 배경과 텍스트 색상
+              ? `bg-modern-border2 ${textClass}`
               : "hover:bg-modern-border hover:text-modern-subtext3 active:bg-[#333333] text-modern-subtext4"
           } rounded-xl transition duration-300`}
         >
@@ -31,7 +42,7 @@ const WidgetTypeSelector: React.FC<WidgetTypeSelectorProps> = ({
           onClick={() => setWidgetType("card")}
           className={`p-2 ${
             widgetType === "card"
-              ? "bg-modern-border2 text-modern-point" // 선택된 상태에서 배경과 텍스트 색상
+              ? `bg-modern-border2 ${textClass}`
               : "hover:bg-modern-border hover:text-modern-subtext3 active:bg-[#333333] text-modern-subtext4"
           } rounded-xl transition duration-300`}
         >
@@ -43,7 +54,7 @@ const WidgetTypeSelector: React.FC<WidgetTypeSelectorProps> = ({
           onClick={() => setWidgetType("cardWithChart")}
           className={`p-2 ${
             widgetType === "cardWithChart"
-              ? "bg-modern-border2 text-modern-point" // 선택된 상태에서 배경과 텍스트 색상
+              ? `bg-modern-border2 ${textClass}`
               : "hover:bg-modern-border hover:text-modern-subtext3 active:bg-[#333333] text-modern-subtext4"
           } rounded-xl transition duration-300`}
         >
@@ -55,7 +66,7 @@ const WidgetTypeSelector: React.FC<WidgetTypeSelectorProps> = ({
           onClick={() => setWidgetType("numberOnly")}
           className={`p-2 ${
             widgetType === "numberOnly"
-              ? "bg-modern-border2 text-modern-point" // 선택된 상태에서 배경과 텍스트 색상
+              ? `bg-modern-border2 ${textClass}`
               : "hover:bg-modern-border hover:text-modern-subtext3 active:bg-[#333333] text-modern-subtext4"
           } rounded-xl transition duration-300`}
         >

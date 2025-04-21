@@ -1,3 +1,4 @@
+import { useThemeStore } from "@/store/useThemeStore";
 import { BarChart, LineChart, PieChart, Circle } from "lucide-react";
 
 type ChartType = "pie" | "bar" | "line" | "doughnut";
@@ -11,6 +12,16 @@ const ChartTypeSelector: React.FC<ChartTypeSelectorProps> = ({
   chartType,
   setChartType,
 }) => {
+  const { theme } = useThemeStore();
+
+  const textClass = {
+    modern: "text-modern-point",
+    blue: "text-blue-point",
+    pink: "text-pink-point",
+    orange: "text-orange-point",
+    ivory: "text-ivory-point",
+  }[theme];
+
   return (
     <div className="mb-4">
       <div className="flex space-x-4">
@@ -18,7 +29,7 @@ const ChartTypeSelector: React.FC<ChartTypeSelectorProps> = ({
           onClick={() => setChartType("pie")}
           className={`p-2 ${
             chartType === "pie"
-              ? "bg-modern-border2 text-modern-point" // 버튼 색상과 텍스트 색상
+              ? `bg-modern-border2 ${textClass}`
               : "hover:bg-modern-border hover:text-modern-subtext3 active:bg-[#333333] text-modern-subtext4 "
           } rounded-xl transition duration-300`}
         >
@@ -28,7 +39,7 @@ const ChartTypeSelector: React.FC<ChartTypeSelectorProps> = ({
           onClick={() => setChartType("bar")}
           className={`p-2 ${
             chartType === "bar"
-              ? "bg-modern-border2 text-modern-point" // 버튼 색상과 텍스트 색상
+              ? `bg-modern-border2 ${textClass}`
               : "hover:bg-modern-border hover:text-modern-subtext3 active:bg-[#333333] text-modern-subtext4"
           } rounded-xl transition duration-300`}
         >
@@ -38,7 +49,7 @@ const ChartTypeSelector: React.FC<ChartTypeSelectorProps> = ({
           onClick={() => setChartType("line")}
           className={`p-2 ${
             chartType === "line"
-              ? "bg-modern-border2 text-modern-point" // 버튼 색상과 텍스트 색상
+              ? `bg-modern-border2 ${textClass}`
               : "hover:bg-modern-border hover:text-modern-subtext3 active:bg-[#333333] text-modern-subtext4"
           } rounded-xl transition duration-300`}
         >
@@ -48,7 +59,7 @@ const ChartTypeSelector: React.FC<ChartTypeSelectorProps> = ({
           onClick={() => setChartType("doughnut")}
           className={`p-2 ${
             chartType === "doughnut"
-              ? "bg-modern-border2 text-modern-point" // 버튼 색상과 텍스트 색상
+              ? `bg-modern-border2 ${textClass}`
               : "hover:bg-modern-border hover:text-modern-subtext3 active:bg-[#333333] text-modern-subtext4"
           } rounded-xl transition duration-300`}
         >
