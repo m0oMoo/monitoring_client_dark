@@ -7,12 +7,12 @@ const MENU = [
   // { id: 1, title: "Dashboard", icon: LayoutGrid, link: "/dashboard" },
   { id: 5, title: "Dashboard", icon: LayoutGrid, link: "/" },
   // { id: 2, title: "Reports", icon: FileText, link: "/reports" },
-  {
-    id: 3,
-    title: "Data Source",
-    icon: Database,
-    link: "/connection/dataSource",
-  },
+  // {
+  //   id: 3,
+  //   title: "Data Source",
+  //   icon: Database,
+  //   link: "/connection/dataSource",
+  // },
   // {
   //   id: 4,
   //   title: "Create Dashboard",
