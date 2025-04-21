@@ -36,7 +36,6 @@ const BorderBtn: React.FC<ButtonProps> = ({ title, onClick }) => {
   return (
     <button
       className={`${hoverBgClass} ${bgClass} ${textClass} px-2 py-0.5`}
-      text-modern-point
       onClick={onClick}
     >
       {title}
