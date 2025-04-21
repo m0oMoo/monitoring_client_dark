@@ -12,11 +12,11 @@ import { useThemeStore } from "@/store/useThemeStore";
 const Layout = ({ children }: { children: ReactNode }) => {
   const pathname = usePathname();
 
-  const [menuOpen, setMenuOpen] = useState<boolean>(true);
   const { theme } = useThemeStore();
   const { tempPanels, clearTempPanels } = useTempPanelStore();
-  const { draftDashboard, resetDraftDashboard } = useDraftDashboardStore();
   const { resetAllEditStates } = useEditStateStore();
+
+  const [menuOpen, setMenuOpen] = useState<boolean>(true);
 
   useEffect(() => {
     const path = pathname;

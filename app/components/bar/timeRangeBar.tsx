@@ -64,8 +64,8 @@ const TimeRangeBar: React.FC<TimeRangeBarProps> = ({
 
     const data = {
       dashboards: [currentDashboard],
-      charts: {}, // 필요 시 차트 상태도 포함
-      widgets: {}, // 필요 시 위젯 상태도 포함
+      charts: {},
+      widgets: {},
       from,
       to,
     };

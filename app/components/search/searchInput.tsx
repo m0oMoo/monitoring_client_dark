@@ -22,7 +22,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
         value={searchQuery}
         onChange={onSearchChange}
         className="p-1 pl-2 text-sm w-full rounded-l-lg outline-none
-        focus:border-modern-point_30 "
+        focus:border-modern-point_30 bg-transparent"
         placeholder="검색"
       />
       <span className="p-1 pr-2 border-text2">
