@@ -20,7 +20,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const path = pathname;
-    const isExcluded = path.includes("/d2") || path.includes("/detail2");
+    const isExcluded = path.includes("/d") || path.includes("/detail");
 
     if (!isExcluded) {
       if (tempPanels) {

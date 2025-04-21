@@ -3,48 +3,59 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Layout, Responsive, WidthProvider } from "react-grid-layout";
-
 import { MoreVertical } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
+
 import Alert from "@/components/alert/alert";
 import TabMenu from "@/components/menu/tabMenu";
 import CustomTable from "@/components/table/customTable";
-import {
-  MIN_WIDGET_HEIGHT,
-  MIN_CHART_WIDTH,
-  MIN_CHART_HEIGHT,
-  MIN_WIDGET_WIDTH,
-} from "@/data/chart/chartDetail";
-import { useChartStore } from "@/store/useChartStore";
-import { useDashboardStore, PanelLayout } from "@/store/useDashboardStore";
-import { useWidgetStore } from "@/store/useWidgetStore";
-import { convertToTable } from "@/utils/convertToTable";
-import AddChartBar from "@/components/bar/addChartBar";
-import TimeRangeBar from "@/components/bar/timeRangeBar";
 import ChartPannel from "@/components/pannel/chart/chartPannel";
 import WidgetPannel from "@/components/pannel/widget/widgetPannel";
+
+import { useDashboardStore2 } from "@/store/useDashboard2Store";
+import { convertToTable } from "@/utils/convertToTable";
+import {
+  MIN_CHART_HEIGHT,
+  MIN_CHART_WIDTH,
+  MIN_WIDGET_HEIGHT,
+  MIN_WIDGET_WIDTH,
+} from "@/data/chart/chartDetail";
+import { Dashboard, Dataset } from "@/types/dashboard";
+import { useDraftDashboardStore } from "@/store/useDraftDashboardStore";
+import DashboardLayout from "@/components/layout/dashboard/layout";
+import { useDashboardStateStore } from "@/store/useDashboardStateStore";
+import { useTempPanelStore } from "@/store/useTempPanelStore";
+import { useEditStateStore } from "@/store/useEditStateStore";
+import CloneModal from "@/components/modal/cloneModal";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
 const DetailDashboard = () => {
   const router = useRouter();
-  const id = useSearchParams();
-  const dashboardId = id.get("id") || "1";
+  const searchParams = useSearchParams();
+  const initialId = searchParams.get("id");
 
-  const { charts, addChart, removeChart } = useChartStore();
-  const { widgets, addWidget, removeWidget } = useWidgetStore();
-  const { dashboardPanels, addPanelToDashboard, dashboardList, saveDashboard } =
-    useDashboardStore();
+  const {
+    getDashboardById,
+    clonePannelToDashboard,
+    dashboardList,
+    addDashboard,
+    updateDashboard,
+  } = useDashboardStore2();
 
-  console.log("📌 현재 대시보드 ID:", dashboardId);
-  console.log("📌 해당 대시보드의 차트 목록:", charts[dashboardId]);
+  const { draftDashboard } = useDraftDashboardStore();
+  const { title, description } = useDashboardStateStore();
+  const {
+    tempPanels,
+    targetDashboardId,
+    setTempPanels,
+    setTempPanel,
+    updateTempPanelLayout,
+    clearTempPanels,
+  } = useTempPanelStore();
 
-  console.log(charts);
-
-  const [from, setFrom] = useState<string | null>(null);
-  const [to, setTo] = useState<string | null>(null);
-  const [refreshTime, setRefreshTime] = useState<number | "autoType">(10);
-  const [lastUpdated, setLastUpdated] = useState<string | null>(null);
+  const [dashboardId, setDashboardId] = useState<string>(initialId || "1");
+  const [dashboard, setDashboard] = useState<Dashboard>();
   const [menuOpenIndex, setMenuOpenIndex] = useState<string | null>(null);
   const [isCloneModalOpen, setIsCloneModalOpen] = useState<boolean>(false);
   const [selectedDashboard, setSelectedDashboard] = useState<string | null>(
@@ -52,41 +63,117 @@ const DetailDashboard = () => {
   );
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
   const [alertMessage, setAlertMessage] = useState<string>("");
-  const [gridLayout, setGridLayout] = useState<
-    { i: string; x: number; y: number; w: number; h: number }[]
-  >([]);
-  const [isEditing, setIsEditing] = useState<boolean>(false);
-  const [prevLayout, setPrevLayout] = useState<Layout[]>([]);
+  const [gridLayout, setGridLayout] = useState<Layout[]>([]);
+  const [panels, setPanels] = useState<any[]>([]);
+  const [deletedPanelIds, setDeletedPanelIds] = useState<string[]>([]);
 
   const layouts = useMemo(() => ({ lg: gridLayout }), [gridLayout]);
 
-  const handleEditClick = () => {
-    if (isEditing) {
-      const updatedLayouts: PanelLayout[] = gridLayout.map((layout) => ({
-        panelId: layout.i,
-        type: charts[dashboardId]?.some((chart) => chart.chartId === layout.i)
-          ? "chart"
-          : "widget",
-        gridPos: {
-          x: layout.x,
-          y: layout.y,
-          w: layout.w,
-          h: layout.h,
-        },
-      }));
+  const isEditing = useEditStateStore(
+    (state) => state.editStates[dashboardId] ?? false
+  );
+  const setEditState = useEditStateStore((state) => state.setEditState);
 
-      console.log("저장할 패널 데이터:", updatedLayouts);
-      saveDashboard(dashboardId, updatedLayouts);
-      setPrevLayout(
-        updatedLayouts.map((panel) => ({ ...panel.gridPos, i: panel.panelId }))
-      );
+  // 대시보드 및 패널 로딩
+  useEffect(() => {
+    // draftDashboard가 있을 때만 설정
+    if (dashboardId === draftDashboard?.id) {
+      setDashboard(draftDashboard); // 기존 대시보드 로드
+      setEditState(draftDashboard?.id, true);
+    } else {
+      const fetchedDashboard = getDashboardById(dashboardId);
+      if (fetchedDashboard) {
+        setDashboard(fetchedDashboard); // 기존 대시보드 로드
+      } else {
+        console.log("대시보드가 없습니다."); // 대시보드가 없을 경우 로깅
+      }
     }
-    setIsEditing((prev) => !prev);
+  }, [dashboardId, draftDashboard]);
+
+  const handleLayoutChange = (layout: Layout[]) => {
+    const updatedPanels = panels.map((panel) => {
+      const updatedLayout = layout.find((item) => item.i === panel.pannelId);
+      if (!updatedLayout) return panel;
+
+      const updatedPanel = {
+        ...panel,
+        gridPos: {
+          x: updatedLayout.x,
+          y: updatedLayout.y,
+          w: updatedLayout.w,
+          h: updatedLayout.h,
+        },
+      };
+
+      // 임시 패널이면 store에도 반영
+      if (targetDashboardId === dashboardId && tempPanels[panel.pannelId]) {
+        updateTempPanelLayout(panel.pannelId, updatedPanel.gridPos);
+      } else if (targetDashboardId === dashboardId) {
+        // 기존 패널이지만 위치만 변경한 경우에도 store에 등록
+        setTempPanel(updatedPanel, dashboardId);
+      }
+
+      return updatedPanel;
+    });
+
+    setPanels(updatedPanels);
+    setGridLayout(layout);
   };
 
-  const chartDataList = charts[dashboardId] || [];
+  const handleSaveDashboard = () => {
+    if (panels.length === 0) {
+      setAlertMessage(
+        "패널을 하나 이상 추가해야 대시보드를 저장할 수 있습니다."
+      );
+      return;
+    }
 
-  const widgetDataList = widgets[dashboardId] || [];
+    // tempPanel 병합 처리
+    let finalPanels = [...panels];
+
+    // tempPanels 병합
+    if (targetDashboardId === dashboardId) {
+      Object.entries(tempPanels).forEach(([pannelId, tempPanel]) => {
+        const isEdit = finalPanels.some((p) => p.pannelId === pannelId);
+        if (isEdit) {
+          finalPanels = finalPanels.map((p) =>
+            p.pannelId === pannelId ? tempPanel : p
+          );
+        } else {
+          finalPanels.push(tempPanel);
+        }
+      });
+    }
+
+    const updatedDashboard: Dashboard = {
+      id: dashboardId === draftDashboard?.id ? draftDashboard?.id : dashboardId,
+      label: title,
+      description,
+      pannels: finalPanels,
+    };
+
+    if (dashboardId !== draftDashboard?.id) {
+      updateDashboard(updatedDashboard);
+      setDashboard(updatedDashboard);
+      setAlertMessage("대시보드가 업데이트되었습니다.");
+    } else {
+      addDashboard(updatedDashboard);
+      setDashboard(updatedDashboard);
+      const newId = uuidv4();
+      setDashboardId(newId);
+      // router.replace(`/detail?id=${newId}`);
+      setAlertMessage("대시보드가 저장되었습니다.");
+    }
+
+    clearTempPanels(); // 💥 저장 후 임시 저장 제거
+  };
+
+  const handleEditClick = () => {
+    if (isEditing) {
+      handleSaveDashboard(); // 저장 버튼 클릭 시 저장 처리
+    }
+    setEditState(dashboardId, !isEditing);
+  };
 
   const handleTabClone = (itemId: string) => {
     setSelectedItem(itemId);
@@ -94,153 +181,159 @@ const DetailDashboard = () => {
   };
 
   const confirmClone = () => {
-    if (!selectedDashboard || !selectedItem) return;
-
-    const targetDashboardId = selectedDashboard;
-    let newItemId: string | null = null;
-
-    // 차트 복제
-    const existingChart = Object.values(charts)
-      .flat()
-      .find((chart) => chart.chartId === selectedItem);
-
-    if (existingChart) {
-      const newChartId = uuidv4();
-      const clonedChartOptions = { ...existingChart.chartOptions };
-      const clonedDatasets = existingChart.datasets.map((dataset) => ({
-        ...dataset,
-      }));
-
-      // gridPos 복사 (기존 위치 유지)
-      const clonedGridPos = { ...existingChart.gridPos };
-
-      addChart(targetDashboardId, clonedChartOptions, clonedDatasets);
-      addPanelToDashboard(targetDashboardId, newChartId, "chart");
-
-      newItemId = newChartId;
-
-      saveDashboard(targetDashboardId, [
-        ...(dashboardPanels[targetDashboardId] || []),
-        {
-          panelId: newChartId,
-          type: "chart",
-          gridPos: clonedGridPos, // 기존 gridPos를 유지
-        },
-      ]);
+    if (selectedItem && selectedDashboard) {
+      clonePannelToDashboard(dashboardId, selectedItem, selectedDashboard);
+      setAlertMessage("복제 완료!");
     }
-
-    // 위젯 복제
-    const existingWidget = Object.values(widgets)
-      .flat()
-      .find((widget) => widget.widgetId === selectedItem);
-
-    if (existingWidget) {
-      const newWidgetId = uuidv4();
-      const clonedWidgetOptions = {
-        ...existingWidget.widgetOptions,
-        widgetId: newWidgetId,
-      };
-
-      // gridPos 복사 (기존 위치 유지)
-      const clonedGridPos = { ...existingWidget.gridPos };
-
-      addWidget(targetDashboardId, clonedWidgetOptions);
-      addPanelToDashboard(targetDashboardId, newWidgetId, "widget");
-
-      newItemId = newWidgetId;
-
-      saveDashboard(targetDashboardId, [
-        ...(dashboardPanels[targetDashboardId] || []),
-        {
-          panelId: newWidgetId,
-          type: "widget",
-          gridPos: clonedGridPos, // 기존 gridPos를 유지
-        },
-      ]);
-    }
-
     setIsCloneModalOpen(false);
-    setAlertMessage("복제 완료!");
-  };
-
-  console.log("이거 왜 안보일까 >>>", dashboardPanels[dashboardId]);
-
-  useEffect(() => {
-    if (
-      dashboardPanels[dashboardId] &&
-      dashboardPanels[dashboardId].length > 0 &&
-      gridLayout.length === 0
-    ) {
-      const savedLayout = dashboardPanels[dashboardId].map((panel) => ({
-        i: panel.panelId,
-        x: panel.gridPos?.x ?? 0,
-        y: panel.gridPos?.y ?? 0,
-        w: panel.gridPos?.w ?? 4,
-        h: panel.gridPos?.h ?? 4,
-      }));
-
-      console.log("📌 Zustand에서 불러온 gridLayout 설정: ", savedLayout);
-      setGridLayout(savedLayout);
-      setPrevLayout(savedLayout);
-    }
-  }, [dashboardPanels, dashboardId]);
-
-  const closeCloneModal = () => {
-    setIsCloneModalOpen(false);
+    setSelectedItem(null);
     setSelectedDashboard(null);
   };
 
-  const handleLayoutChange = (layout: Layout[]) => {
-    if (JSON.stringify(prevLayout) === JSON.stringify(layout)) {
+  // 항상 병합 기준: dashboard.pannels + panels + tempPanel (가장 우선순위)
+  type PanelMapValue = any; // 필요 시 타입 정리 가능
+  useEffect(() => {
+    if (!dashboard) return;
+
+    const savedPanels = dashboard.pannels ?? [];
+    const panelMap = new Map<string, PanelMapValue>();
+
+    // 1. dashboard에 저장된 패널
+    savedPanels.forEach((p) => {
+      if (!deletedPanelIds.includes(p.pannelId)) {
+        panelMap.set(p.pannelId, p);
+      }
+    });
+
+    // 2. panels 상태값 (위치 최신화 반영)
+    panels.forEach((p) => {
+      if (!deletedPanelIds.includes(p.pannelId)) {
+        const prev = panelMap.get(p.pannelId);
+        panelMap.set(p.pannelId, {
+          ...(prev || p),
+          gridPos: p.gridPos, // 위치 최신 반영
+        });
+      }
+    });
+
+    // 3. tempPanels는 최종적으로 덮어쓰기 (가장 우선순위)
+    if (targetDashboardId === dashboardId) {
+      Object.entries(tempPanels).forEach(([pannelId, tempPanel]) => {
+        if (!deletedPanelIds.includes(pannelId)) {
+          panelMap.set(pannelId, tempPanel);
+        }
+      });
+    }
+
+    const mergedPanels = Array.from(panelMap.values());
+    setPanels(mergedPanels);
+    setGridLayout(
+      mergedPanels.map((panel) => ({
+        i: panel.pannelId,
+        x: panel.gridPos.x,
+        y: panel.gridPos.y,
+        w: panel.gridPos.w,
+        h: panel.gridPos.h,
+        minW:
+          panel.pannelType === "widget" ? MIN_WIDGET_WIDTH : MIN_CHART_WIDTH,
+        minH:
+          panel.pannelType === "widget" ? MIN_WIDGET_HEIGHT : MIN_CHART_HEIGHT,
+      }))
+    );
+  }, [
+    dashboard?.id,
+    JSON.stringify(dashboard?.pannels),
+    JSON.stringify(tempPanels),
+    targetDashboardId,
+    dashboardId,
+    JSON.stringify(panels),
+    JSON.stringify(deletedPanelIds),
+  ]);
+
+  const handleCancel = () => {
+    clearTempPanels();
+    setDeletedPanelIds([]);
+
+    if (dashboard) {
+      setPanels(dashboard.pannels);
+      const originalLayout = dashboard.pannels.map((panel) => ({
+        i: panel.pannelId,
+        x: panel.gridPos.x,
+        y: panel.gridPos.y,
+        w: panel.gridPos.w,
+        h: panel.gridPos.h,
+        minW:
+          panel.pannelType === "widget" ? MIN_WIDGET_WIDTH : MIN_CHART_WIDTH,
+        minH:
+          panel.pannelType === "widget" ? MIN_WIDGET_HEIGHT : MIN_CHART_HEIGHT,
+      }));
+
+      setGridLayout(originalLayout);
+    }
+
+    setEditState(dashboardId, false);
+  };
+
+  const handlePanelDelete = (pannelId: string) => {
+    if (!isEditing) {
+      setAlertMessage("편집 모드에서만 패널을 삭제할 수 있습니다.");
       return;
     }
 
-    const updatedLayouts: PanelLayout[] = layout.map((l) => {
-      const chartExists = charts[dashboardId]?.some(
-        (chart) => chart.chartId === l.i
-      );
-      const widgetExists = widgets[dashboardId]?.some(
-        (widget) => widget.widgetId === l.i
-      );
+    const newPanels = panels.filter((p) => p.pannelId !== pannelId);
+    const newLayout = gridLayout.filter((l) => l.i !== pannelId);
 
-      return {
-        panelId: l.i,
-        type: chartExists ? "chart" : widgetExists ? "widget" : "chart",
-        gridPos: {
-          // gridPos를 올바르게 업데이트
-          x: l.x,
-          y: l.y,
-          w: l.w,
-          h: l.h,
-        },
-      };
-    });
+    const isTempPanel = tempPanels[pannelId];
+    const isInOriginalDashboard =
+      dashboard?.pannels.some((p) => p.pannelId === pannelId) ?? false;
 
-    setGridLayout(layout);
-    setPrevLayout(layout);
-    saveDashboard(dashboardId, updatedLayouts);
+    // tempPanel인데, 원래 대시보드에는 없는 완전 신규 → 임시 패널 삭제
+    if (isTempPanel && !isInOriginalDashboard) {
+      const updated = { ...tempPanels };
+      delete updated[pannelId];
+
+      setTempPanels(updated);
+      setPanels(newPanels);
+      setGridLayout(newLayout);
+      setAlertMessage("임시 패널이 삭제되었습니다.");
+      return;
+    }
+
+    // 기존 대시보드에 있던 패널 삭제
+    setDeletedPanelIds((prev) => [...prev, pannelId]);
+
+    // 임시 저장에 있으면 같이 제거 (위치만 바꿔서 들어간 경우)
+    if (isTempPanel) {
+      const updated = { ...tempPanels };
+      delete updated[pannelId];
+      setTempPanels(updated);
+    }
+
+    setPanels(newPanels);
+    setGridLayout(newLayout);
+    setAlertMessage("패널이 삭제되었습니다. 저장하려면 Save를 누르세요.");
+  };
+
+  // 패널 수정으로 이동하는 함수 (라우팅)
+  const handlePanelEdit = (pannelId: string) => {
+    if (isEditing) {
+      router.push(`/d?id=${dashboardId}&pannelId=${pannelId}`);
+    } else {
+      setAlertMessage("편집 모드에서만 패널을 수정할 수 있습니다.");
+    }
   };
 
   return (
-    <div className="bg-modern-bg min-h-[calc(100vh-80px)]">
-      <AddChartBar
-        isEdit={isEditing}
-        onCreateClick={() => router.push(`/d?id=${dashboardId}`)}
+    <div className="bg-modern-bg min-h-[calc(100vh-80px)] pt-6">
+      <DashboardLayout
+        onCreateClick={() => {
+          router.push(`/d?id=${dashboardId}`);
+        }}
+        onGridChange={() => {}}
         modifiable={true}
         onEditClick={handleEditClick}
-      />
-
-      <TimeRangeBar
-        from={from}
-        to={to}
-        lastUpdated={lastUpdated}
-        refreshTime={refreshTime}
-        onChange={(type, value) =>
-          type === "from" ? setFrom(value) : setTo(value)
-        }
-        onRefreshChange={setRefreshTime}
-      />
-      <div className="relative w-full">
+        onCancelClick={handleCancel}
+      >
         <ResponsiveGridLayout
           className="layout"
           layouts={layouts}
@@ -250,203 +343,127 @@ const DetailDashboard = () => {
           compactType={null}
           preventCollision={true}
           onLayoutChange={handleLayoutChange}
-          maxRows={20} // 최대 줄 수 제한
+          maxRows={20}
           draggableHandle=".drag-handle"
           resizeHandles={["se"]}
         >
-          {chartDataList.map((chart) => {
-            const chartLayout = gridLayout.find(
-              (item) => item.i === chart.chartId
+          {panels.map((panel) => {
+            const layout = gridLayout.find(
+              (item) => item.i === panel.pannelId
             ) || {
-              i: chart.chartId,
+              i: panel.pannelId,
               x: 0,
               y: 0,
               w: 4,
-              h: Math.max(MIN_WIDGET_HEIGHT, 4),
+              h: 4,
               minW: MIN_CHART_WIDTH,
               minH: MIN_CHART_HEIGHT,
             };
 
             return (
               <div
-                key={chart.chartId}
-                data-grid={{
-                  ...chartLayout,
-                  minW: MIN_CHART_WIDTH,
-                  minH: MIN_CHART_HEIGHT,
-                }}
-                className={`drag-handle cursor-grab`}
+                key={panel.pannelId}
+                data-grid={layout}
+                //   className="drag-handle cursor-grab"
               >
-                <div className="bg-modern-bg p-2 h-full flex flex-col relative">
-                  {/* 메뉴 버튼 (기존 유지) */}
-                  <div className="absolute top-2 right-2 z-10 pointer-events-auto">
+                {isEditing && (
+                  <div
+                    className="absolute top-2 right-2 z-10"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                    }}
+                  >
                     <MoreVertical
                       className="text-text3 cursor-pointer hover:text-text2"
                       onClick={(e) => {
                         e.stopPropagation();
+                        e.preventDefault();
                         setMenuOpenIndex(
-                          menuOpenIndex === chart.chartId ? null : chart.chartId
+                          menuOpenIndex === panel.pannelId
+                            ? null
+                            : panel.pannelId
                         );
                       }}
                     />
-                    {menuOpenIndex === chart.chartId && (
-                      <TabMenu
-                        index={chart.chartId}
-                        setEditingTabIndex={() =>
-                          router.push(
-                            `/d?id=${dashboardId}&chartId=${chart.chartId}`
-                          )
-                        }
-                        setIsModalOpen={() => {}}
-                        setMenuOpenIndex={setMenuOpenIndex}
-                        handleTabDelete={() =>
-                          removeChart(dashboardId, chart.chartId)
-                        }
-                        handleTabClone={handleTabClone}
-                      />
+                    {menuOpenIndex === panel.pannelId && (
+                      <div
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                        }}
+                      >
+                        <TabMenu
+                          index={panel.pannelId}
+                          setEditingTabIndex={() =>
+                            handlePanelEdit(panel.pannelId)
+                          }
+                          setIsModalOpen={() => {}}
+                          setMenuOpenIndex={setMenuOpenIndex}
+                          handleTabDelete={() =>
+                            handlePanelDelete(panel.pannelId)
+                          }
+                          handleTabClone={handleTabClone}
+                        />
+                      </div>
                     )}
                   </div>
-
-                  {/* 제목 */}
+                )}
+                <div className="drag-handle cursor-grab bg-modern-bg p-2 h-full flex flex-col relative">
                   <h2 className="text-base font-normal mb-2 text-modern-text">
-                    {chart.chartOptions.titleText}
+                    {panel.pannelType === "widget"
+                      ? panel.pannelOptions.label
+                      : panel.pannelOptions.titleText}
                   </h2>
 
-                  {/* 차트 또는 테이블 렌더링 */}
                   <div className="flex-1 overflow-hidden">
-                    {chart.chartOptions.displayMode === "chart" ? (
+                    {panel.pannelType === "widget" ? (
+                      <WidgetPannel
+                        {...panel.pannelOptions}
+                        backgroundColor={
+                          panel.pannelOptions.widgetBackgroundColor
+                        }
+                        className="scale-[1] w-full h-full"
+                      />
+                    ) : panel.pannelOptions.displayMode === "chart" ? (
                       <ChartPannel
-                        type={chart.chartOptions.chartType}
-                        datasets={chart.datasets || []}
-                        options={chart.chartOptions}
+                        type={panel.pannelOptions.chartType}
+                        datasets={panel.datasets || []}
+                        options={panel.pannelOptions}
                       />
                     ) : (
                       <CustomTable
                         columns={[
                           { key: "name", label: "ID" },
-                          ...chart.datasets.map((dataset) => ({
-                            key: dataset.label,
-                            label: dataset.label,
-                          })),
+                          ...(panel.datasets
+                            ? panel.datasets.map((dataset: Dataset) => ({
+                                key: dataset.label,
+                                label: dataset.label,
+                              }))
+                            : []), // datasets가 undefined일 경우 빈 배열 반환
                         ]}
-                        data={convertToTable(chart.datasets).rows}
-                        title={chart.chartOptions.titleText}
+                        data={convertToTable(panel.datasets || []).rows}
+                        title={panel.pannelOptions.titleText}
                       />
                     )}
                   </div>
-                </div>
-              </div>
-            );
-          })}
-
-          {widgetDataList.map((widget) => {
-            const widgetLayout = gridLayout.find(
-              (item) => item.i === widget.widgetId
-            ) || {
-              i: widget.widgetId,
-              x: 0,
-              y: 0,
-              w: 4, // 기본 가로 크기
-              h: Math.max(MIN_WIDGET_HEIGHT, 4), // 기본 세로 크기
-              minW: MIN_WIDGET_WIDTH, // 최소 가로 크기 설정
-              minH: MIN_WIDGET_HEIGHT, // 최소 세로 크기 설정
-            };
-
-            return (
-              <div
-                key={widget.widgetId}
-                data-grid={{
-                  ...widgetLayout, // widgetLayout에서 x, y, w, h 값을 그대로 사용
-                  minW: 2,
-                  maxW: 4,
-                  minH: MIN_WIDGET_HEIGHT, // 최소 세로 크기 설정
-                }}
-                className="drag-handle cursor-grab widget-item"
-              >
-                {/* max-h-[230px] max-w-[530px] */}
-                <div className="relative flex flex-col h-full min-w-72 min-h-32">
-                  <div className="absolute top-2 right-2 z-10 pointer-events-auto">
-                    <MoreVertical
-                      className="text-text3 cursor-pointer hover:text-text2"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setMenuOpenIndex(
-                          menuOpenIndex === widget.widgetId
-                            ? null
-                            : widget.widgetId
-                        );
-                      }}
-                    />
-                    {menuOpenIndex === widget.widgetId && (
-                      <TabMenu
-                        index={widget.widgetId}
-                        setEditingTabIndex={() =>
-                          router.push(
-                            `/d?id=${dashboardId}&chartId=${widget.widgetId}`
-                          )
-                        }
-                        setIsModalOpen={() => {}}
-                        setMenuOpenIndex={setMenuOpenIndex}
-                        handleTabDelete={() =>
-                          removeWidget(dashboardId, widget.widgetId)
-                        }
-                        handleTabClone={handleTabClone}
-                      />
-                    )}
-                  </div>
-                  {/* 위젯 렌더링 */}
-                  <WidgetPannel
-                    backgroundColor={widget.widgetOptions.widgetBackgroundColor}
-                    {...widget.widgetOptions}
-                    className="scale-[1] w-full h-full"
-                  />
                 </div>
               </div>
             );
           })}
         </ResponsiveGridLayout>
-      </div>
+      </DashboardLayout>
+
       {isCloneModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-[100]">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-            <h2 className="text-lg font-bold mb-4">대시보드 선택</h2>
-            <ul>
-              {dashboardList.map((dashboard) => (
-                <li
-                  key={dashboard.id}
-                  onClick={() => setSelectedDashboard(dashboard.id)}
-                  className={`cursor-pointer p-2 rounded ${
-                    selectedDashboard === dashboard.id
-                      ? "bg-modern-btn text-white"
-                      : "hover:bg-gray-100"
-                  }`}
-                >
-                  {dashboard.label}
-                </li>
-              ))}
-            </ul>
-            <div className="flex justify-end mt-4">
-              <button
-                onClick={closeCloneModal}
-                className="mr-2 px-4 py-2 bg-gray-200 rounded text-md2"
-              >
-                취소
-              </button>
-              <button
-                onClick={confirmClone}
-                disabled={!selectedDashboard}
-                className={`px-4 py-2 rounded text-md2 text-white ${
-                  selectedDashboard
-                    ? "bg-modern-btn"
-                    : "bg-modern-btn opacity-80"
-                }`}
-              >
-                확인
-              </button>
-            </div>
-          </div>
-        </div>
+        <CloneModal
+          dashboardList={dashboardList}
+          selectedDashboard={selectedDashboard}
+          setSelectedDashboard={setSelectedDashboard}
+          setIsCloneModalOpen={setIsCloneModalOpen}
+          confirmClone={confirmClone}
+        />
       )}
+
       {alertMessage && <Alert message={alertMessage} />}
     </div>
   );

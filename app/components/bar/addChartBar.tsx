@@ -90,7 +90,7 @@ const AddChartBar = ({
   };
 
   const handleGoBack = () => {
-    router.push("/dashboard2");
+    router.push("/dashboard");
   };
 
   return (

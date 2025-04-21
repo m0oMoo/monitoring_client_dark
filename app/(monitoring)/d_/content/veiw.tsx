@@ -1,6 +1,6 @@
 import dynamic from "next/dynamic";
 
-const PannelSection = dynamic(() => import("./pannelSection"), {
+const ChartSection = dynamic(() => import("./chartSection"), {
   ssr: false,
 });
 const RightSection = dynamic(() => import("./rightSection"), {
@@ -10,7 +10,7 @@ const RightSection = dynamic(() => import("./rightSection"), {
 const View = () => {
   return (
     <div className="relative min-h-screen bg-modern-bg">
-      <PannelSection />
+      <ChartSection />
       <RightSection />
     </div>
   );

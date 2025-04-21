@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 
 const MENU = [
   // { id: 1, title: "Dashboard", icon: LayoutGrid, link: "/dashboard" },
-  { id: 5, title: "Dashboard", icon: LayoutGrid, link: "/dashboard2" },
+  { id: 5, title: "Dashboard", icon: LayoutGrid, link: "/" },
   { id: 2, title: "Reports", icon: FileText, link: "/reports" },
   {
     id: 3,
@@ -32,7 +32,7 @@ const LeftMenu = () => {
   // Logic to check if "Dashboard" item should be active
   const isDashboardActive =
     pathname.includes("/d") ||
-    pathname.includes("/dashboard") ||
+    pathname.includes("/") ||
     pathname.includes("/detail");
 
   return (
