@@ -12,47 +12,50 @@
 
 .react-grid-item {
   position: relative;
-  border: 1px solid #ddd;
+  border: 1px solid #a1a1a1;
 }
 
 .react-resizable-handle {
   position: absolute;
-  width: 20px;
-  height: 20px;
-  background: #ccc;
+  width: 10px;
+  height: 10px;
+  background: #a1a1a1;
   bottom: 0;
   right: 0;
   cursor: se-resize; /* 모서리 드래그 커서 */
 }
 
-.will-change-transform {
-  @apply transform; /* 기본 변환 활성화 */
+/* .will-change-transform {
+  @apply transform; 
   will-change: transform;
-}
+} */
 
 .layout .react-grid-item {
-  border: 1px solid #4e4e4e; /* 투명한 border로 설정 */
+  border: 1px solid #4e4e4e;
 }
 
 /* widget에만 border를 없애기 */
 .widget-item {
-  border: none !important; /* border를 없애기 */
+  border: none !important;
 }
 
 /* React Grid Item의 드래그 또는 리사이즈 중 나타나는 그림자 색상 및 스타일 수정 */
 .layout .react-grid-item.react-draggable-dragging,
 .layout .react-grid-item.react-resizable-resizing {
-  box-shadow: 0 0 10px 4px rgba(128, 203, 196, 0.3) !important; /* 그림자 색상 및 투명도 조정 */
+  box-shadow: 0 0 10px 4px rgba(256, 256, 256, 0.1) !important; /* 그림자 색상 및 투명도 조정 */
+  /* box-shadow: 0 0 10px 4px rgba(128, 203, 196, 0.3) !important;  */
 }
 
 /* 드래그 중인 아이템이 들어갈 자리에 나타나는 배경 색상 수정 */
 .layout .react-grid-item.react-draggable-dragging ~ .react-grid-item {
-  background-color: rgba(128, 203, 196, 0.3) !important;
+  background-color: rgba(256, 256, 256, 0.1) !important;
+  /* background-color: rgba(128, 203, 196, 0.3) !important; */
 }
 
 /* 드래그 중인 대상이 들어갈 자리에 나타나는 하이라이트 배경 색상 수정 */
 .layout .react-grid-placeholder {
-  background-color: rgba(128, 203, 196, 0.3) !important;
+  background-color: rgba(256, 256, 256, 0.1) !important;
+  /* background-color: rgba(128, 203, 196, 0.3) !important; */
 }
 
 /* React-Tabulator 테이블의 배경색과 텍스트 색상 변경 */
@@ -200,17 +203,15 @@
   background-color: #2e2e2e !important; /* Set dark background for the calendar */
 }
 
-/* Apply color for the highlighted date (current date) */
-.react-datepicker__day--highlighted {
-  background-color: #80cbc4 !important; /* Set highlighted date background */
-  color: #333333 !important; /* Set text color for highlighted date */
-}
+/* .react-datepicker__day--highlighted {
+  background-color: #80cbc4 !important; 
+  color: #333333 !important; 
+} */
 
-/* Apply color for selected date */
-.react-datepicker__day--selected {
-  background-color: #80cbc4 !important; /* Set selected date background */
-  color: #333333 !important; /* Set text color for selected date */
-}
+/* .react-datepicker__day--selected {
+  background-color: #80cbc4 !important; 
+  color: #333333 !important;
+} */
 
 /* Time zone background */
 .react-datepicker__time-container {
@@ -219,18 +220,18 @@
 
 /* Time list item color */
 .react-datepicker__time-list-item:hover {
-  color: #80cbc4 !important; /* Set time color */
+  color: #80cbc4 !important;
 }
 
-.react-datepicker__time-list-item--selected {
-  background-color: #80cbc4 !important; /* Set time color */
+/* .react-datepicker__time-list-item--selected {
+  background-color: #80cbc4 !important;
   color: #333333 !important;
-}
+} */
 
 /* Hover effect for time list item */
 .react-datepicker__time-list-item:hover {
-  background-color: #444444 !important; /* Set hover background color */
-  color: #dfdfdf !important; /* Set hover text color */
+  background-color: #444444 !important;
+  color: #dfdfdf !important;
 }
 /* 스크롤바 배경색을 다크모드 색상으로 설정 */
 .react-datepicker__time-container::-webkit-scrollbar {
@@ -239,12 +240,32 @@
 }
 
 /* 스크롤바 Thumb (스크롤을 잡을 부분) */
-.react-datepicker__time-container::-webkit-scrollbar-thumb {
-  background-color: #80cbc4; /* 원하는 색으로 설정 */
+/* .react-datepicker__time-container::-webkit-scrollbar-thumb {
+  background-color: #80cbc4;
   border-radius: 4px;
-}
+} */
 
 /* 스크롤바 Track (배경 색상) */
 .react-datepicker__time-container::-webkit-scrollbar-track {
   background-color: #2e2e2e; /* 다크모드 배경색 */
+}
+
+.react-datepicker__day--highlighted {
+  background-color: #afafaf !important;
+  color: #2e2e2e !important;
+}
+
+.react-datepicker__day--selected {
+  background-color: #afafaf !important;
+  color: #2e2e2e !important;
+}
+
+.react-datepicker__time-list-item--selected {
+  background-color: #afafaf !important;
+  color: #2e2e2e !important;
+}
+
+.react-datepicker__time-container::-webkit-scrollbar-thumb {
+  background-color: #afafaf !important;
+  border-radius: 4px;
 }

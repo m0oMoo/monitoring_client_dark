@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import { useThemeStore } from "@/store/useThemeStore";
+import React from "react";
 
 interface SwitchProps {
   checked: boolean;
@@ -6,16 +7,36 @@ interface SwitchProps {
 }
 
 const ToggleSwitch: React.FC<SwitchProps> = ({ checked, onChange }) => {
+  const { theme } = useThemeStore();
+
   const handleToggle = () => {
     onChange(!checked);
   };
 
+  // 체크되었을 때 배경 색상
+  const checkedBgClass = {
+    modern: "bg-modern-point_80",
+    blue: "bg-blue-point_80",
+    pink: "bg-pink-point_80",
+    orange: "bg-orange-point_80",
+    ivory: "bg-ivory-point_80",
+  }[theme];
+
+  // 체크 안됐을 때 배경 색상
+  const uncheckedBgClass = {
+    modern: "bg-modern-btn_hover",
+    blue: "bg-modern-btn_hover",
+    pink: "bg-modern-btn_hover",
+    orange: "bg-modern-btn_hover",
+    ivory: "bg-modern-btn_hover",
+  }[theme];
+
   return (
     <div
       onClick={handleToggle}
-      className={`relative inline-flex items-center cursor-pointer ${
-        checked ? "bg-modern-point_80" : "bg-modern-btn_hover"
-      } rounded-full w-11 h-6 transition-colors duration-200 ease-in-out`}
+      className={`relative inline-flex items-center cursor-pointer rounded-full w-11 h-6 transition-colors duration-200 ease-in-out ${
+        checked ? checkedBgClass : uncheckedBgClass
+      }`}
     >
       <span
         className={`${

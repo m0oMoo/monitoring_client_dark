@@ -6,22 +6,31 @@ import WidgetOption from "./widgetOption";
 import { useSelectedSection } from "@/context/selectedSectionContext";
 import { useChartStore } from "@/store/useChartStore";
 import { useWidgetStore } from "@/store/useWidgetStore";
+import { useThemeStore } from "@/store/useThemeStore";
 
 const RightSection = () => {
   const searchParams = useSearchParams();
   const chartId = searchParams.get("chartId") || undefined;
 
+  const { theme } = useThemeStore();
   const { selectedSection, setSelectedSection } = useSelectedSection();
   const { charts } = useChartStore();
   const { widgets } = useWidgetStore();
 
-  // ✅ `selectedSectionValue`를 따로 관리 (사용자가 변경 가능)
   const [selectedSectionValue, setSelectedSectionValue] =
     useState<string>(selectedSection);
-  const isInitialLoad = useRef(true); // 최초 로딩 여부 체크
+  const isInitialLoad = useRef(true);
+
+  const bgClass = {
+    modern: "bg-modern-point_10",
+    blue: "bg-blue-point_10",
+    pink: "bg-pink-point_10",
+    orange: "bg-orange-point_10",
+    ivory: "bg-ivory-point_10",
+  }[theme];
 
   useEffect(() => {
-    if (!chartId || !isInitialLoad.current) return; // 초기 실행 이후에는 실행되지 않도록 방지
+    if (!chartId || !isInitialLoad.current) return;
 
     // 차트에 포함된 경우
     const isChart = Object.values(charts).some((chartList) =>
@@ -67,10 +76,10 @@ const RightSection = () => {
         {/* Data Binding 버튼 - selectedSection을 변경하지 않고, activeTab만 변경 */}
         <button
           onClick={() => handleSectionClick("dataBinding")}
-          className={`px-[7.5px] py-[8.5px] border-b border-modern-border ${
+          className={`px-[7.5px] py-[9.5px] border-b border-modern-border ${
             activeTab === "dataBinding"
-              ? "bg-modern-point_10 text-modern-text"
-              : "bg-modern-bg text-modern-text_disable"
+              ? `${bgClass} text-modern-text`
+              : " text-modern-text_disable"
           }`}
         >
           Data Binding
@@ -80,20 +89,20 @@ const RightSection = () => {
         <div className="flex flex-row w-full border-b border-modern-border">
           <button
             onClick={() => handleSectionClick("chartOption")}
-            className={`w-full py-2 border-r border-modern-border ${
+            className={`w-full py-[8.8px] border-r border-modern-border ${
               selectedSectionValue === "chartOption"
-                ? "bg-modern-point_10 text-modern-text"
-                : "bg-modern-bg text-modern-text_disable"
+                ? `${bgClass} text-modern-text`
+                : " text-modern-text_disable"
             }`}
           >
             Chart Option
           </button>
           <button
             onClick={() => handleSectionClick("widgetOption")}
-            className={`w-full py-2 ${
+            className={`w-full py-[8.8px] ${
               selectedSectionValue === "widgetOption"
-                ? "bg-modern-point_10 text-modern-text"
-                : "bg-modern-bg text-modern-text_disable"
+                ? `${bgClass} text-modern-text`
+                : " text-modern-text_disable"
             }`}
           >
             Widget Option

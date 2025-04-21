@@ -214,19 +214,19 @@ const PannelSection = () => {
     if (draftDashboard?.id === dashboardId) {
       // 새로 만드는 대시보드 → 기존 방식 유지
       addPannelToDraft(newPannel, isEditing);
-      router.push(`/detail2?id=${draftDashboard.id}`);
+      router.push(`/detail?id=${draftDashboard.id}`);
     } else if (dashboardId) {
       resetDraftDashboard();
       // 기존 대시보드 → 저장 대신 임시로 보관
       setTempPanel(newPannel, dashboardId);
-      router.push(`/detail2?id=${dashboardId}`);
+      router.push(`/detail?id=${dashboardId}`);
     }
 
     // draft 대시보드에 패널 추가
     //   if (draftDashboard?.id === dashboardId) {
     //     addPannelToDraft(newPannel, isEditing);
     //     // draft 대시보드로 이동
-    //     router.push(`/detail2?id=${draftDashboard.id}`);
+    //     router.push(`/detail?id=${draftDashboard.id}`);
     //   }
     //   // 기존 대시보드가 있을 경우
     //   else if (dashboardId) {
@@ -239,7 +239,7 @@ const PannelSection = () => {
     //       addPannelToDashboard(dashboardId, newPannel);
     //     }
     //     // 기존 대시보드로 이동
-    //     router.push(`/detail2?id=${dashboardId}`);
+    //     router.push(`/detail?id=${dashboardId}`);
     //   }
   };
 

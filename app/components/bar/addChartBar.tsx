@@ -4,6 +4,8 @@ import { useDashboardStateStore } from "@/store/useDashboardStateStore";
 import { useDashboardStore2 } from "@/store/useDashboard2Store";
 import { useDraftDashboardStore } from "@/store/useDraftDashboardStore";
 import { Eye, EyeOff } from "lucide-react";
+import BasicBtn from "../button/borderBtn";
+import BorderBtn from "../button/basicBtn";
 
 interface AddChartBarProps {
   isEdit: boolean;
@@ -39,7 +41,7 @@ const AddChartBar = ({
   const [isEditingTitle, setIsEditingTitle] = useState<boolean>(false);
   const [isEditingDesc, setIsEditingDesc] = useState<boolean>(false);
   const [isDescriptionVisible, setIsDescriptionVisible] =
-    useState<boolean>(true);
+    useState<boolean>(false);
 
   // 대시보드 및 패널 로딩
   useEffect(() => {
@@ -88,12 +90,12 @@ const AddChartBar = ({
   };
 
   const handleGoBack = () => {
-    router.push("/dashboard2");
+    router.push("/dashboard");
   };
 
   return (
     <>
-      <div className="flex justify-between items-center mt-5 bg-modern-bg border-b border-modern-border border-0.5 py-1.5 px-3">
+      <div className="flex justify-between items-center mt-5  border-b border-modern-border border-0.5 py-1.5 px-3">
         {/* breadcrumb + 이름/설명 인라인 수정 */}
         <div>
           <div className="flex text-lg1 text-modern-text_disable">
@@ -200,30 +202,14 @@ const AddChartBar = ({
         {/* 버튼들 */}
         <div className="flex flex-row gap-5">
           <div className="flex flex-row gap-2 text-sm1">
-            {isEdit && (
-              <button
-                className="hover:bg-modern-point_20 bg-modern-point_10 px-2 py-0.5 text-modern-point border-modern-point"
-                onClick={onCancelClick}
-              >
-                cancel
-              </button>
-            )}
+            {isEdit && <BasicBtn title="cancel" onClick={onCancelClick} />}
             {modifiable && (
-              <button
-                className="border hover:bg-modern-point_20 bg-modern-point_10 px-2 py-1 text-modern-point border-modern-point"
+              <BorderBtn
+                title={isEdit ? "Save" : "Edit"}
                 onClick={onEditClick}
-              >
-                {isEdit ? "Save" : "Edit"}
-              </button>
+              />
             )}
-            {isEdit && (
-              <button
-                className="border hover:bg-modern-point_20 bg-modern-point_10 px-2 py-1 text-modern-point border-modern-point"
-                onClick={onCreateClick}
-              >
-                Create
-              </button>
-            )}
+            {isEdit && <BorderBtn title="Create" onClick={onCreateClick} />}
           </div>
         </div>
       </div>

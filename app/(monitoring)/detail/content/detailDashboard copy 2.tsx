@@ -208,7 +208,7 @@
 //   };
 
 //   return (
-//     <div className="bg-modern-bg min-h-[calc(100vh-80px)]">
+//     <div className=" min-h-[calc(100vh-80px)]">
 //       <DashboardLayout
 //         onCreateClick={() => router.push(`/d2?id=${dashboardId}`)}
 //         onGridChange={() => {}}
@@ -290,7 +290,7 @@
 //                     )}
 //                   </div>
 //                 )}
-//                 <div className="drag-handle cursor-grab bg-modern-bg p-2 h-full flex flex-col relative">
+//                 <div className="drag-handle cursor-grab  p-2 h-full flex flex-col relative">
 //                   <h2 className="text-base font-normal mb-2 text-modern-text">
 //                     {panel.pannelType === "widget"
 //                       ? panel.pannelOptions.label

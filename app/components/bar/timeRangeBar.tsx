@@ -64,8 +64,8 @@ const TimeRangeBar: React.FC<TimeRangeBarProps> = ({
 
     const data = {
       dashboards: [currentDashboard],
-      charts: {}, // 필요 시 차트 상태도 포함
-      widgets: {}, // 필요 시 위젯 상태도 포함
+      charts: {},
+      widgets: {},
       from,
       to,
     };
@@ -77,7 +77,7 @@ const TimeRangeBar: React.FC<TimeRangeBarProps> = ({
 
   return (
     <div
-      className={`flex items-center justify-between bg-modern-bg text-modern-text border-b border-modern-border border-0.5 mb-4 ${className}`}
+      className={`flex items-center justify-between  text-modern-text border-b border-modern-border border-0.5 mb-4 ${className}`}
     >
       <div className="pl-4">
         <TimeRangePicker from={from} to={to} onChange={onChange} />

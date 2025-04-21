@@ -67,3 +67,55 @@ export const COLUMNS: { [key: string]: string[] } = {
   traffic: ["day", "visitors", "page_views", "bounce_rate"],
   engagement: ["post_id", "likes", "shares", "comments"],
 };
+
+export const TARGET_OPTIONS = [
+  { label: "Queue", value: "queue" },
+  { label: "Topic", value: "topic" },
+  { label: "Consumer", value: "consumer" },
+  { label: "Durable", value: "durable" },
+  { label: "Connection", value: "conn" },
+  { label: "Producer", value: "producer" },
+  { label: "Property", value: "prop" },
+  { label: "Store", value: "store" },
+  { label: "System Monitor", value: "sysmon" },
+  { label: "Host Metrics", value: "host" },
+];
+
+export const metricOptionsMap: Record<
+  string,
+  { label: string; value: string }[]
+> = {
+  queue: [
+    { label: "Pending Message Size", value: "pendMsgSize" },
+    { label: "Pending Message Count", value: "pendMsgCnt" },
+    { label: "Incoming Message Rate", value: "inMsgRate" },
+    { label: "Outgoing Message Rate", value: "outMsgRate" },
+  ],
+  topic: [
+    { label: "Publish Rate", value: "pubRate" },
+    { label: "Subscribe Rate", value: "subRate" },
+  ],
+  consumer: [
+    { label: "Acknowledgement Rate", value: "ackRate" },
+    { label: "Unacknowledged Message Count", value: "unackMsgCnt" },
+  ],
+  durable: [{ label: "Durable Subscriptions", value: "durableSubs" }],
+  conn: [
+    { label: "Active Connections", value: "activeConn" },
+    { label: "Pending Connections", value: "pendingConn" },
+  ],
+  producer: [{ label: "Producer Rate", value: "producerRate" }],
+  prop: [
+    { label: "Property Size", value: "propSize" },
+    { label: "Property Count", value: "propCount" },
+  ],
+  store: [{ label: "Store Usage", value: "storeUsage" }],
+  sysmon: [
+    { label: "CPU Usage", value: "cpuUsage" },
+    { label: "Memory Usage", value: "memUsage" },
+  ],
+  host: [
+    { label: "Disk Usage", value: "diskUsage" },
+    { label: "Network Traffic", value: "networkTraffic" },
+  ],
+};

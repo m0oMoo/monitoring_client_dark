@@ -163,7 +163,7 @@ const ChartOption = () => {
 
   return (
     <div
-      className="bg-modern-bg border-l border-0.5 no-scrollbar border-modern-border
+      className=" border-l border-0.5 no-scrollbar border-modern-border
     py-8 pl-6 w-[300px] h-[100vh] overflow-y-auto"
     >
       {isClient && (

@@ -1,3 +1,4 @@
+import { useThemeStore } from "@/store/useThemeStore";
 import React from "react";
 
 interface ToggleButtonGroupProps {
@@ -8,14 +9,6 @@ interface ToggleButtonGroupProps {
   clssName?: string;
 }
 
-/**
- *
- * @param options 버튼 옵션 배열
- * @param selected 선택된 값
- * @param onChange
- * @param label 그룹의 레이블
- * @returns
- */
 const RoundToggleBtnGroup: React.FC<ToggleButtonGroupProps> = ({
   options,
   selected,
@@ -23,6 +16,26 @@ const RoundToggleBtnGroup: React.FC<ToggleButtonGroupProps> = ({
   label,
   clssName,
 }) => {
+  const { theme } = useThemeStore();
+
+  // 테마별로 포인트 색상 매핑
+  const selectedBgClass = {
+    modern: "bg-modern-point_80",
+    blue: "bg-blue-point_80",
+    pink: "bg-pink-point_80",
+    orange: "bg-orange-point_80",
+    ivory: "bg-ivory-point_80",
+  }[theme];
+
+  // 테마별로 선택된 텍스트 색상 매핑 (필요하면)
+  const selectedTextClass = {
+    modern: "text-modern-subtext3",
+    blue: "text-blue-subtext3",
+    pink: "text-pink-subtext3",
+    orange: "text-orange-subtext3",
+    ivory: "text-ivory-subtext3",
+  }[theme];
+
   return (
     <div className={`${clssName} text-sm1`}>
       <div className="relative flex">
@@ -33,7 +46,7 @@ const RoundToggleBtnGroup: React.FC<ToggleButtonGroupProps> = ({
               onClick={() => onChange(option)}
               className={`flex-1 py-1.5 font-semibold rounded-full transition duration-300 ${
                 selected === option
-                  ? "bg-modern-point_80 text-modern-subtext3"
+                  ? `${selectedBgClass} ${selectedTextClass}`
                   : "bg-modern-subtext4 text-modern-subtext"
               }`}
             >

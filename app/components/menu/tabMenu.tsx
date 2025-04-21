@@ -25,7 +25,7 @@ const TabMenu: React.FC<TabMenuProps> = ({
 
   return (
     <div
-      className={`absolute right-0 mt-2 w-40 bg-modern-bg shadow-lg
+      className={`absolute right-0 mt-2 w-40  shadow-lg
     border border-modern-border rounded-md z-50 `}
     >
       {/* 수정 버튼 */}
