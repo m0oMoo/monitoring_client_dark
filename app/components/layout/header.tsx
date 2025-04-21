@@ -1,12 +1,24 @@
 import { Home, User, Menu } from "lucide-react";
 import SettingsButton from "../button/settingBtn";
+import { useThemeStore } from "@/store/useThemeStore";
 
 const Header = ({ toggleMenu }: { toggleMenu: () => void }) => {
+  const { theme } = useThemeStore();
+
+  const bgClass = {
+    modern: "bg-modern-bg",
+    blue: "bg-blue-bg",
+    pink: "bg-pink-bg",
+    orange: "bg-orange-bg",
+    ivory: "bg-ivory-bg",
+  }[theme];
+
   return (
     <>
       <header
-        className="w-full  p-1 shadow-md flex justify-between items-center
-        fixed top-0 left-0 right-0 z-50 border-b border-modern-border"
+        className={`w-full  p-1 shadow-md flex justify-between items-center
+        fixed top-0 left-0 right-0 border-b border-modern-border ${bgClass}`}
+        style={{ zIndex: 1000 }}
       >
         <div className="flex items-center space-x-2">
           <button onClick={toggleMenu} className="p-2">
