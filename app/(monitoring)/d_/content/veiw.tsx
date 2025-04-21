@@ -9,7 +9,7 @@ const RightSection = dynamic(() => import("./rightSection"), {
 
 const View = () => {
   return (
-    <div className="relative min-h-screen bg-modern-bg">
+    <div className="relative min-h-screen ">
       <ChartSection />
       <RightSection />
     </div>

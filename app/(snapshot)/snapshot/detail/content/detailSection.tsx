@@ -38,7 +38,7 @@ const SnapshotDetailSection = () => {
   }));
 
   return (
-    <div className="bg-modern-bg min-h-[calc(100vh-80px)]">
+    <div className=" min-h-[calc(100vh-80px)]">
       <div className="bg-transparent h-[42.8px]" />
       <SnapshotTimeRangeBar
         title={snapshot.name}
@@ -62,7 +62,7 @@ const SnapshotDetailSection = () => {
             key={panel.pannelId}
             data-grid={layout.find((l: Layout) => l.i === panel.pannelId)}
           >
-            <div className="bg-modern-bg p-4 h-full flex flex-col border border-modern-border rounded">
+            <div className=" p-4 h-full flex flex-col border border-modern-border rounded">
               <h2 className="text-base font-semibold mb-2 text-modern-text">
                 {panel.pannelType === "widget"
                   ? panel.pannelOptions.label

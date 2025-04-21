@@ -70,7 +70,7 @@ const RightSection = () => {
           className={`px-[7.5px] py-[8.5px] border-b border-modern-border ${
             activeTab === "dataBinding"
               ? "bg-modern-point_10 text-modern-text"
-              : "bg-modern-bg text-modern-text_disable"
+              : " text-modern-text_disable"
           }`}
         >
           Data Binding
@@ -83,7 +83,7 @@ const RightSection = () => {
             className={`w-full py-2 border-r border-modern-border ${
               selectedSectionValue === "chartOption"
                 ? "bg-modern-point_10 text-modern-text"
-                : "bg-modern-bg text-modern-text_disable"
+                : " text-modern-text_disable"
             }`}
           >
             Chart Option
@@ -93,7 +93,7 @@ const RightSection = () => {
             className={`w-full py-2 ${
               selectedSectionValue === "widgetOption"
                 ? "bg-modern-point_10 text-modern-text"
-                : "bg-modern-bg text-modern-text_disable"
+                : " text-modern-text_disable"
             }`}
           >
             Widget Option

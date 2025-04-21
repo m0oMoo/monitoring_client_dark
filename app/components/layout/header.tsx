@@ -1,23 +1,11 @@
-import { Home, User, Settings, Menu } from "lucide-react";
-import { useThemeStore } from "@/store/useThemeStore";
-import { useState } from "react";
+import { Home, User, Menu } from "lucide-react";
 import SettingsButton from "../button/settingBtn";
 
 const Header = ({ toggleMenu }: { toggleMenu: () => void }) => {
-  const { setTheme } = useThemeStore();
-  const [open, setOpen] = useState(false);
-
-  const handleThemeChange = (
-    theme: "modern" | "blue" | "pink" | "orange" | "ivory"
-  ) => {
-    setTheme(theme);
-    setOpen(false);
-  };
-
   return (
     <>
       <header
-        className="w-full bg-modern-bg p-1 shadow-md flex justify-between items-center
+        className="w-full  p-1 shadow-md flex justify-between items-center
         fixed top-0 left-0 right-0 z-50 border-b border-modern-border"
       >
         <div className="flex items-center space-x-2">

@@ -15,7 +15,7 @@ const CloneModal = ({
 }: CloneModalProps) => {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm z-[100]">
-      <div className="bg-modern-bg p-6 rounded-xl shadow-lg w-96 border border-modern-border">
+      <div className=" p-6 rounded-xl shadow-lg w-96 border border-modern-border">
         <h2 className="text-lg font-semibold text-modern-text mb-4">
           대시보드 선택
         </h2>

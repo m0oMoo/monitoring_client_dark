@@ -76,7 +76,7 @@ export default function Home() {
 
   return (
     <div
-      className="bg-modern-bg text-modern-text min-h-screen p-4 pt-[44px]"
+      className=" text-modern-text min-h-screen p-4 pt-[44px]"
       onClick={() => setMenuOpenIndex(null)}
     >
       <header className="flex justify-between items-center my-3">

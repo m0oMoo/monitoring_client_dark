@@ -29,7 +29,7 @@ const SnapshotModal = ({ isOpen, onClose, onSave }: SnapshotModalProps) => {
   return (
     isOpen && (
       <div className="fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm flex justify-center items-center z-50">
-        <div className="bg-modern-bg p-6 w-96 border border-modern-border rounded-xl shadow-lg">
+        <div className=" p-6 w-96 border border-modern-border rounded-xl shadow-lg">
           <h2 className="text-lg text-modern-text font-semibold mb-4">
             스냅샷 저장
           </h2>

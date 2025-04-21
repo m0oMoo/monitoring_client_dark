@@ -86,7 +86,7 @@ const AddTabModal = ({
           />
           <div className="flex justify-end gap-3">
             <button
-              className="px-3 py-1.5 bg-modern-bg text-sm text-[#CFCFCF] hover:bg-modern-bg1"
+              className="px-3 py-1.5  text-sm text-[#CFCFCF] hover:bg-modern-bg1"
               onClick={handleClose}
             >
               취소

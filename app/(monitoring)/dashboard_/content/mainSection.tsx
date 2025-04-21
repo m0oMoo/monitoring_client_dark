@@ -222,7 +222,7 @@ const MainSection = () => {
   };
 
   return (
-    <div className="bg-modern-bg min-h-[calc(100vh-80px)]">
+    <div className=" min-h-[calc(100vh-80px)]">
       <AddChartBar
         isEdit={isEditing}
         onCreateClick={() => router.push(`/d?id=${dashboardId}`)}
@@ -277,7 +277,7 @@ const MainSection = () => {
                 }}
                 className={`drag-handle cursor-grab`}
               >
-                <div className="bg-modern-bg p-2 h-full flex flex-col relative">
+                <div className=" p-2 h-full flex flex-col relative">
                   {/* 메뉴 버튼 (기존 유지) */}
                   <div className="absolute top-2 right-2 z-10 pointer-events-auto">
                     <MoreVertical

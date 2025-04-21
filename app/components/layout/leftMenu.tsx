@@ -37,7 +37,7 @@ const LeftMenu = () => {
 
   return (
     <nav
-      className="w-60 bg-modern-bg p-4 shadow-xl h-full flex flex-col space-y-4
+      className="w-60  p-4 shadow-xl h-full flex flex-col space-y-4
     border-r border-0.5 border-modern-border"
     >
       <div className="flex items-center space-x-2">

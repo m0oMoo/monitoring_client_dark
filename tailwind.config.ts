@@ -61,7 +61,7 @@ export default {
           point_80: "rgba(144, 202, 249, 0.8)",
         },
         pink: {
-          bg: "#333333",
+          bg: "#2b2b2b",
           bg_sub: "#3A2F32",
           point: "#FF8FA3",
           point_10: "rgba(255, 143, 163, 0.1)",
@@ -72,9 +72,9 @@ export default {
           point_80: "rgba(255, 143, 163, 0.8)",
         },
         orange: {
-          bg: "#333333",
+          bg: "#2f2f2f",
           bg_sub: "#3A3A3A",
-          point: "#FFA726",
+          point: "#f1ab41",
           point_10: "rgba(255, 167, 38, 0.1)",
           point_20: "rgba(255, 167, 38, 0.2)",
           point_30: "rgba(255, 167, 38, 0.3)",

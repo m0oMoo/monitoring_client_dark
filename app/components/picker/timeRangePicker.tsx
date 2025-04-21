@@ -20,7 +20,7 @@ const TimeRangePicker = ({ from, to, onChange }: TimeRangePickerProps) => {
         showTimeSelect
         dateFormat="yyyy.MM.dd HH:mm"
         className="border border-modern-border py-1 px-2 text-sm1
-        bg-modern-bg text-modern-text focus:outline-none"
+         text-modern-text focus:outline-none"
       />
 
       <label className="text-sm_bold text-modern-text">To:</label>
@@ -32,7 +32,7 @@ const TimeRangePicker = ({ from, to, onChange }: TimeRangePickerProps) => {
         showTimeSelect
         dateFormat="yyyy.MM.dd HH:mm"
         className="border border-modern-border py-1 px-2 text-sm1
-        bg-modern-bg text-modern-text focus:outline-none"
+         text-modern-text focus:outline-none"
       />
     </div>
   );

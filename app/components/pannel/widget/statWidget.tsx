@@ -72,7 +72,7 @@ const StatWidget = ({
   return (
     <div
       className={`${className} border border-modern-border relative flex flex-col items-center justify-center
-      border-navy-border pb-3 w-72 h-48 rounded-md shadow-lg bg-modern-bg`}
+      border-navy-border pb-3 w-72 h-48 rounded-md shadow-lg `}
     >
       {/* 라벨을 차트 위에 배치 */}
       <div className="absolute top-2 text-lg font-bold text-modern-primary">

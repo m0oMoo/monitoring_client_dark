@@ -31,7 +31,7 @@ const SnapshotTimeRangeBar: React.FC<TimeRangeBarProps> = ({
   return (
     <div className="">
       <div
-        className={`flex items-center justify-between bg-modern-bg border-b border-modern-border border-0.5 ${className}`}
+        className={`flex items-center justify-between  border-b border-modern-border border-0.5 ${className}`}
       >
         <div className="flex justify-between gap-4 pl-4 py-1.5 px-3">
           <span
@@ -51,7 +51,7 @@ const SnapshotTimeRangeBar: React.FC<TimeRangeBarProps> = ({
         </div>
       </div>
       <div
-        className={`flex items-center justify-between bg-modern-bg text-modern-text border-b border-modern-border border-0.5 mb-4 ${className}`}
+        className={`flex items-center justify-between  text-modern-text border-b border-modern-border border-0.5 mb-4 ${className}`}
       >
         <div className="flex gap-4 pl-4">
           <label className="flex items-center gap-2 text-sm_bold">

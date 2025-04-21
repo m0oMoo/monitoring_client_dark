@@ -14,7 +14,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
 }) => {
   return (
     <div
-      className={`flex items-center w-72 ml-auto bg-modern-bg
+      className={`flex items-center w-72 ml-auto 
     shadow-sm border border-modern-border ${className}`}
     >
       <input
@@ -22,7 +22,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
         value={searchQuery}
         onChange={onSearchChange}
         className="p-1 pl-2 text-sm w-full rounded-l-lg outline-none
-        focus:border-modern-point_30 bg-modern-bg"
+        focus:border-modern-point_30 "
         placeholder="검색"
       />
       <span className="p-1 pr-2 border-text2">
