@@ -12,14 +12,14 @@
 
 .react-grid-item {
   position: relative;
-  border: 1px solid #ddd;
+  border: 1px solid #a1a1a1;
 }
 
 .react-resizable-handle {
   position: absolute;
-  width: 20px;
-  height: 20px;
-  background: #ccc;
+  width: 10px;
+  height: 10px;
+  background: #a1a1a1;
   bottom: 0;
   right: 0;
   cursor: se-resize; /* 모서리 드래그 커서 */

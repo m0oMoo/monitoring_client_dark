@@ -32,7 +32,7 @@ export default {
           border_focus: "#AFAFAF",
           border2: "#444444",
           link: "#80CBC4",
-          btn: "#444444", // 어두운 회색 배경
+          btn: "#444444",
           black_10: "rgba(0, 0, 0, 0.1)",
           white_0: "rgba(256, 256, 256, 0.04)",
           white_10: "rgba(256, 256, 256, 0.1)",
@@ -92,8 +92,6 @@ export default {
           point_50: "rgba(245, 236, 216, 0.5)",
           point_70: "rgba(245, 236, 216, 0.7)",
           point_80: "rgba(245, 236, 216, 0.8)",
-          // bg: "#fdfdf4",
-          // bg_sub: "#fffffa",
           bg_primary: "#fdfaf2",
           bg_secondary: "#fdfcf7",
           text: "#fffcf2",
