@@ -26,3 +26,24 @@ body {
   background: var(--background);
   font-family: "Pretendard", sans-serif;
 }
+
+/* 테마별 background 색상 */
+body[data-theme="modern"] {
+  --background: #2e2e2e;
+}
+
+body[data-theme="blue"] {
+  --background: #1e2229;
+}
+
+body[data-theme="pink"] {
+  --background: #2b2b2b;
+}
+
+body[data-theme="orange"] {
+  --background: #2c2a28;
+}
+
+body[data-theme="ivory"] {
+  --background: #2b2825;
+}
