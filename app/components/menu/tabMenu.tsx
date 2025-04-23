@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Edit2, File, Trash2 } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { useThemeStore } from "@/store/useThemeStore";
 
 interface TabMenuProps {
   index: string;
@@ -22,16 +23,25 @@ const TabMenu: React.FC<TabMenuProps> = ({
   className,
 }) => {
   const pathname = usePathname();
+  const { theme } = useThemeStore();
+
+  const bgClass = {
+    modern: "bg-modern-bg",
+    blue: "bg-blue-bg",
+    pink: "bg-pink-bg",
+    orange: "bg-orange-bg",
+    ivory: "bg-ivory-bg",
+  }[theme];
 
   return (
     <div
-      className={`absolute right-0 mt-2 w-40  shadow-lg
-    border border-modern-border rounded-md z-50 `}
+      className={`absolute right-0 mt-2 w-40 shadow-lg
+    border border-modern-border rounded-md z-50 ${bgClass}`}
     >
       {/* 수정 버튼 */}
       <button
-        className="flex items-center w-full px-4 py-2 text-sm text-modern-text 
-        hover:bg-modern-bg2 hover:rounded-t-md"
+        className={`flex items-center w-full px-4 py-2 text-sm text-modern-text 
+        hover:bg-modern-bg2 rounded-t-md `}
         onClick={(e) => {
           e.stopPropagation();
           setEditingTabIndex(index);
@@ -62,7 +72,7 @@ const TabMenu: React.FC<TabMenuProps> = ({
       {/* 복제 버튼 */}
       <button
         className="flex items-center w-full px-4 py-2 text-modern-text text-sm
-        hover:bg-modern-bg2 hover:rounded-b-md"
+        hover:bg-modern-bg2 rounded-b-md"
         onClick={(e) => {
           e.stopPropagation();
           handleTabClone(index);

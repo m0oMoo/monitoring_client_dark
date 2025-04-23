@@ -1,6 +1,7 @@
 "use client";
 
 import { useDashboardStore } from "@/store/useDashboardStore";
+import { useThemeStore } from "@/store/useThemeStore";
 import React, { useState, useEffect } from "react";
 
 interface AddTabModalProps {
@@ -22,9 +23,19 @@ const AddTabModal = ({
   onEditTab,
   editingIndex,
 }: AddTabModalProps) => {
-  const { dashboardList } = useDashboardStore(); // navy-btn대시보드 목록 가져오기
+  const { theme } = useThemeStore();
+  const { dashboardList } = useDashboardStore();
+
   const [newTabName, setNewTabName] = useState<string>("");
   const [newTabDescription, setNewTabDescription] = useState<string>("");
+
+  const bgClass = {
+    modern: "bg-modern-bg",
+    blue: "bg-blue-bg",
+    pink: "bg-pink-bg",
+    orange: "bg-orange-bg",
+    ivory: "bg-ivory-bg",
+  }[theme];
 
   useEffect(() => {
     if (isOpen) {
@@ -64,8 +75,10 @@ const AddTabModal = ({
 
   return (
     isOpen && (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
-        <div className="bg-[#2E2E2E] p-6 w-96 border border-[#4E4E4E]">
+      <div
+        className={`fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm`}
+      >
+        <div className={`${bgClass} p-6 w-96 border border-[#4E4E4E]`}>
           <h2 className="mb-4 text-lg text-modern-text">
             {editingIndex !== null ? "Edit Dashboard" : "Add New Dashboard"}
           </h2>

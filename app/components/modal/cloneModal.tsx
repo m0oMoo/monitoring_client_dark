@@ -1,3 +1,5 @@
+import { useThemeStore } from "@/store/useThemeStore";
+
 type CloneModalProps = {
   dashboardList: { id: string; label: string }[];
   selectedDashboard: string | null;
@@ -13,9 +15,21 @@ const CloneModal = ({
   setIsCloneModalOpen,
   confirmClone,
 }: CloneModalProps) => {
+  const { theme } = useThemeStore();
+
+  const bgClass = {
+    modern: "bg-modern-bg",
+    blue: "bg-blue-bg",
+    pink: "bg-pink-bg",
+    orange: "bg-orange-bg",
+    ivory: "bg-ivory-bg",
+  }[theme];
+
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm z-[100]">
-      <div className=" p-6 rounded-xl shadow-lg w-96 border border-modern-border">
+      <div
+        className={`${bgClass} p-6 rounded-xl shadow-lg w-96 border border-modern-border`}
+      >
         <h2 className="text-lg font-semibold text-modern-text mb-4">
           대시보드 선택
         </h2>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useThemeStore } from "@/store/useThemeStore";
 import React, { useState, useEffect } from "react";
 
 interface SnapshotModalProps {
@@ -9,8 +10,18 @@ interface SnapshotModalProps {
 }
 
 const SnapshotModal = ({ isOpen, onClose, onSave }: SnapshotModalProps) => {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
+  const { theme } = useThemeStore();
+
+  const [name, setName] = useState<string>("");
+  const [description, setDescription] = useState<string>("");
+
+  const bgClass = {
+    modern: "bg-modern-bg",
+    blue: "bg-blue-bg",
+    pink: "bg-pink-bg",
+    orange: "bg-orange-bg",
+    ivory: "bg-ivory-bg",
+  }[theme];
 
   useEffect(() => {
     if (isOpen) {
@@ -29,7 +40,9 @@ const SnapshotModal = ({ isOpen, onClose, onSave }: SnapshotModalProps) => {
   return (
     isOpen && (
       <div className="fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm flex justify-center items-center z-50">
-        <div className=" p-6 w-96 border border-modern-border rounded-xl shadow-lg">
+        <div
+          className={`${bgClass} p-6 w-96 border border-modern-border rounded-xl shadow-lg`}
+        >
           <h2 className="text-lg text-modern-text font-semibold mb-4">
             스냅샷 저장
           </h2>
