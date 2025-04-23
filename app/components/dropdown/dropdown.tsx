@@ -19,7 +19,7 @@ const Dropdown: React.FC<DropdownProps> = ({
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className={`py-1.5 px-2 text-md1 rounded-md  border border-modern-border
+      className={`py-1.5 px-2 text-md1 rounded-md border bg-modern-border2 border-modern-border
       placeholder:text-modern-text_disable text-modern-text
       focus:outline-none focus:outline-modern-border ${className}`}
     >
